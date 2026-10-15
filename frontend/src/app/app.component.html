@@ -1,0 +1,12 @@
+@if (!isAdminRoute()) {
+  <nh-header />
+}
+
+<router-outlet />
+
+@if (!isAdminRoute()) {
+  <nh-footer />
+  <nh-whatsapp-button />
+}
+
+<nh-booking-modal />

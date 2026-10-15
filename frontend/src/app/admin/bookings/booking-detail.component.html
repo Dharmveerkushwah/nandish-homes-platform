@@ -1,0 +1,113 @@
+<section class="admin-page">
+  <a class="back-link" (click)="goBack()" role="button">
+    <nh-icon name="chevron-left" [size]="12" /> Back to bookings
+  </a>
+
+  @if (data.loading() && !booking()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading booking…</span></div>
+  } @else if (!booking()) {
+    <div class="empty-state">
+      <nh-icon name="alert" [size]="22" />
+      <p>Booking "{{ reference }}" couldn't be found in the loaded bookings.</p>
+    </div>
+  } @else {
+    @let b = booking()!;
+    <div class="admin-page__head">
+      <div>
+        <h1>Booking {{ b.reference }}</h1>
+        <p>{{ b.room.name }} · {{ b.checkIn | date:'d MMM yyyy' }} – {{ b.checkOut | date:'d MMM yyyy' }}</p>
+      </div>
+      <span [class]="'badge badge--' + statusClass(b.status)" style="font-size:11px;padding:7px 14px">{{ readableStatus(b.status) }}</span>
+    </div>
+
+    <div class="booking-detail-grid">
+      <section class="admin-card">
+        <div class="admin-card-head"><div><h2>Guest information</h2></div></div>
+        <dl class="detail-list">
+          <div><dt>Name</dt><dd>{{ b.guestName ?? 'Not provided by API yet' }}</dd></div>
+          <div><dt>Email</dt><dd>{{ b.guestEmail ?? 'Not provided by API yet' }}</dd></div>
+          <div><dt>Phone</dt><dd>{{ b.guestPhone ?? 'Not provided by API yet' }}</dd></div>
+          <div><dt>Guests</dt><dd>{{ b.guests }}</dd></div>
+        </dl>
+        @if (!b.guestEmail && !b.guestPhone) {
+          <nh-not-connected>The booking response doesn't yet include guest contact details (gap doc item 27) — showing what the API returns.</nh-not-connected>
+        }
+      </section>
+
+      <section class="admin-card">
+        <div class="admin-card-head"><div><h2>Room information</h2></div></div>
+        <dl class="detail-list">
+          <div><dt>Room</dt><dd>{{ b.room.name }}</dd></div>
+          <div><dt>Type</dt><dd>{{ b.room.type }}</dd></div>
+          <div><dt>Check-in</dt><dd>{{ b.checkIn | date:'EEE, d MMM yyyy' }}</dd></div>
+          <div><dt>Check-out</dt><dd>{{ b.checkOut | date:'EEE, d MMM yyyy' }}</dd></div>
+          <div><dt>Nights</dt><dd>{{ nights() }}</dd></div>
+        </dl>
+      </section>
+
+      <section class="admin-card">
+        <div class="admin-card-head"><div><h2>Payment</h2></div></div>
+        <dl class="detail-list">
+          <div><dt>Rate / night</dt><dd>{{ perNight() | currency:'INR':'symbol-narrow':'1.0-0' }}</dd></div>
+          <div><dt>Final amount</dt><dd><strong>{{ b.totalAmount | currency:'INR':'symbol-narrow':'1.0-0' }}</strong></dd></div>
+          <div><dt>Payment status</dt><dd><span class="badge" [class]="'badge--' + (b.paymentStatus ?? 'pending').toLowerCase()">{{ b.paymentStatus ?? 'Not recorded' }}</span></dd></div>
+        </dl>
+      </section>
+
+      <section class="admin-card">
+        <div class="admin-card-head"><div><h2>Special requests</h2></div></div>
+        <p class="detail-note">{{ b.specialRequest ?? 'None provided.' }}</p>
+      </section>
+
+      <section class="admin-card" style="grid-column:1/-1">
+        <div class="admin-card-head"><div><h2>Payment history</h2><p>Real payment records for this booking (never a fabricated "paid" state)</p></div></div>
+        @if (paymentsLoading()) {
+          <div class="loading-state"><span class="spinner-navy"></span><span>Loading payment history…</span></div>
+        } @else if (paymentsError()) {
+          <nh-not-connected>Could not load payment history — the GET /api/admin/bookings/{{ b.id }}/payments endpoint may not be reachable.</nh-not-connected>
+        } @else if (!payments().length) {
+          <p class="detail-note">No payment records yet for this booking.</p>
+        } @else {
+          <div class="admin-table-wrap">
+            <table class="admin-table">
+              <thead><tr><th>Provider</th><th>Reference</th><th>Amount</th><th>Status</th><th>Refund</th><th>Paid at</th></tr></thead>
+              <tbody>
+                @for (payment of payments(); track payment.id) {
+                  <tr>
+                    <td>{{ payment.provider }}</td>
+                    <td>{{ payment.providerReference }}</td>
+                    <td>{{ payment.amount | currency:'INR':'symbol-narrow':'1.0-0' }}</td>
+                    <td>
+                      <span class="badge" [class]="'badge--' + payment.status.toLowerCase()">{{ payment.status }}</span>
+                      @if (payment.failureReason) { <div class="admin-note">{{ payment.failureReason }}</div> }
+                    </td>
+                    <td>{{ payment.refundStatus ?? '—' }}</td>
+                    <td>{{ payment.paidAt ? (payment.paidAt | date:'d MMM yyyy, h:mm a') : '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    </div>
+
+    @if (actions().length) {
+      <section class="admin-card booking-actions">
+        <div class="admin-card-head"><div><h2>Actions</h2><p>Update this booking's status</p></div></div>
+        <div class="admin-form__actions" style="justify-content:flex-start">
+          @for (action of actions(); track action.target) {
+            <button
+              [class]="'button button--sm ' + (action.danger ? 'button--danger' : 'button--solid')"
+              type="button"
+              [disabled]="actionBusy() !== null"
+              (click)="runAction(action)"
+            >
+              {{ actionBusy() === action.target ? 'Updating…' : action.label }}
+            </button>
+          }
+        </div>
+      </section>
+    }
+  }
+</section>

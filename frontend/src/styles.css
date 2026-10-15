@@ -1,0 +1,216 @@
+/* Global shared styles: reset, tokens, typography, buttons and small
+   primitives reused across every page. Page-specific layout lives in each
+   page component's own stylesheet; layout chrome (header/footer/whatsapp/
+   booking modal) lives with those components. */
+
+:root{
+  --navy:#0c3b5c;--navy-deep:#082d49;--blue:#11638b;--gold:#c49b3e;
+  --sand:#f5f4ef;--paper:#fff;--ink:#163b57;--muted:#687b88;--line:#e2e7e8;
+  --serif:'Playfair Display',Georgia,serif;--sans:'DM Sans',Arial,sans-serif;
+  --header-h:82px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:var(--header-h)}
+body{margin:0;background:var(--sand);color:var(--ink);font-family:var(--sans);font-size:14px;line-height:1.5}
+a{color:inherit;text-decoration:none}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+img{max-width:100%}
+
+.brand{display:flex;align-items:center;gap:7px;font-weight:700;letter-spacing:.08em;font-size:13px;line-height:1}
+.brand--dark{color:var(--navy)}
+.eyebrow{font-size:10px;text-transform:uppercase;letter-spacing:.16em;font-weight:700;margin:0 0 10px;color:var(--blue)}
+
+.hero h1,.section-heading h2,.explore-section h2,.booking-modal h2,.page-intro h1,.admin-login h1{
+  font-family:var(--serif);font-weight:500;line-height:1.04;letter-spacing:-.035em;margin:0;
+}
+.hero h1 em,.section-heading h2 em,.explore-section h2 em,.booking-modal h2 em,.page-intro h1 em,.admin-login h1 em{
+  font-style:italic;color:#e2c16f;
+}
+
+.button{border:0;display:inline-flex;align-items:center;justify-content:space-between;gap:14px;padding:13px 18px;border-radius:5px;font-size:10.5px;font-weight:700;letter-spacing:.02em;transition:transform .2s,background .2s,box-shadow .2s}
+.button:hover{transform:translateY(-2px)}
+.button--solid{background:var(--navy);color:#fff}
+.button--solid:hover{background:var(--navy-deep)}
+.button--light{background:#fff;color:var(--navy)}
+.button--whatsapp{background:#1eaf67;color:#fff;gap:9px}
+.button--whatsapp:hover{background:#189257}
+.button:disabled{opacity:.55;transform:none;cursor:not-allowed}
+.button--wide{width:100%;justify-content:center}
+
+.outline-button{display:inline-flex;align-items:center;gap:6px;border:1px solid #c8d5da;border-radius:5px;color:var(--navy);padding:9px 14px;font-size:10.5px;font-weight:600;background:#fff;transition:border-color .15s,background .15s}
+.outline-button:hover{border-color:var(--gold);background:#fdf9f0}
+.outline-button:disabled{opacity:.6;cursor:not-allowed}
+
+.text-link{border:0;background:none;padding:8px 0;font-size:11px;font-weight:700;color:var(--navy);display:inline-flex;align-items:center;gap:5px}
+.text-link:hover{color:var(--gold)}
+
+/* Shared page shell used by content pages (About, Gallery, FAQ, Contact, Reviews, Room Details, Legal) */
+.page-shell{padding:calc(var(--header-h) + 20px) 6% 70px;min-height:100vh}
+.page-shell--narrow{max-width:1250px;margin:auto}
+.back-link{display:inline-flex;align-items:center;gap:6px;font-size:10px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px}
+.back-link:hover{color:var(--navy)}
+.page-intro{padding:36px 0 46px}
+.page-intro h1{font-size:clamp(40px,6vw,72px);color:var(--navy)}
+.page-intro>p:last-child{max-width:460px;color:#65736c;margin-top:16px;font-size:12.5px;line-height:1.6}
+
+.section-heading{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:24px}
+.section-heading h2{font-size:clamp(26px,3vw,40px);color:var(--navy)}
+.section-heading>p{color:#768891;text-align:right;font-size:11px}
+
+.room-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.room-grid--results{grid-template-columns:repeat(3,1fr)}
+
+.loading-state,.empty-state{background:#fff;padding:40px 24px;text-align:center;color:#748791;font-size:12px;border-radius:8px;display:flex;flex-direction:column;align-items:center;gap:10px;grid-column:1/-1}
+.empty-state svg{color:var(--gold)}
+.spinner-navy,.spinner-dark{display:inline-block;width:14px;height:14px;border-radius:50%;border:2px solid rgba(12,59,92,.2);border-top-color:var(--navy);animation:nh-spin .7s linear infinite}
+.spinner-dark{border-color:rgba(255,255,255,.35);border-top-color:#fff}
+@keyframes nh-spin{to{transform:rotate(360deg)}}
+
+.form-note{color:#65736c;font-size:11px}
+.form-note--error{color:#a64d37}
+
+.admin-login__card>p:not(.eyebrow){color:#687871;margin-bottom:27px}
+.admin-login .button{margin-top:10px;width:100%}
+
+/* Simple fade/rise-in used by several page sections for subtle entrance polish */
+@keyframes nh-rise-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+
+@media(max-width:800px) {
+  .room-grid,.room-grid--results{grid-template-columns:1fr}
+  .page-shell{padding:calc(var(--header-h) + 10px) 7% 50px}
+}
+
+/* ============================================================
+   Admin shared primitives - used across every /admin/* page so
+   each admin component's own stylesheet only needs page-specific
+   layout. Kept global because Angular's emulated view encapsulation
+   would otherwise scope these to whichever component defined them
+   first (see round-1 notes on the same issue for the public site).
+   ============================================================ */
+.button--ghost{background:none;color:var(--navy);border:1px solid #d7e0e6}
+.button--ghost:hover{background:#f3f6f8}
+.button--danger{background:#c5453f;color:#fff}
+.button--danger:hover{background:#a83933}
+.button--sm{padding:8px 12px;font-size:9.5px}
+.icon-btn{border:0;background:none;display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:5px;color:#5c7186}
+.icon-btn:hover{background:#eef2f5;color:var(--navy)}
+.icon-btn--danger:hover{background:#fbe2e4;color:#a83933}
+
+.admin-page{padding:22px 0 40px}
+.admin-page__head{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:18px;flex-wrap:wrap}
+.admin-page__head h1{margin:0;font:600 21px/1.25 var(--sans);color:#122b4e}
+.admin-page__head p{margin:4px 0 0;color:#7c8ba0;font-size:11px}
+.admin-page__actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.admin-card{background:#fff;border:1px solid #e8edf2;border-radius:6px;box-shadow:0 3px 14px rgba(31,65,95,.04);padding:18px 16px}
+.admin-card + .admin-card{margin-top:14px}
+
+.admin-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:16px}
+.admin-search{position:relative;flex:1 1 240px;max-width:340px}
+.admin-search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#96a5b3}
+.admin-search input{width:100%;padding:9px 11px 9px 32px;border:1px solid #dbe5e8;border-radius:5px;font-size:11.5px;background:#fbfcfd}
+.admin-select,.admin-toolbar select,.admin-toolbar input[type=date]{border:1px solid #dbe5e8;border-radius:5px;padding:9px 10px;font-size:11px;color:#3d5568;background:#fff}
+.tab-pills{display:flex;gap:6px;flex-wrap:wrap}
+.tab-pill{border:1px solid #dbe5e8;background:#fff;color:#4d6879;border-radius:20px;padding:7px 14px;font-size:10.5px;font-weight:600}
+.tab-pill.active{background:var(--navy);border-color:var(--navy);color:#fff}
+
+.admin-table-wrap{overflow-x:auto;border:1px solid #eef1f4;border-radius:6px}
+table.admin-table{width:100%;border-collapse:collapse;min-width:640px;font-size:11.5px}
+table.admin-table thead th{text-align:left;background:#f7f9fb;color:#69798b;font-size:9.5px;text-transform:uppercase;letter-spacing:.06em;padding:11px 12px;border-bottom:1px solid #eef1f4;white-space:nowrap;cursor:pointer;user-select:none}
+table.admin-table thead th.sortable:hover{color:var(--navy)}
+table.admin-table thead th span.arrow{margin-left:4px;color:var(--gold)}
+table.admin-table tbody td{padding:11px 12px;border-bottom:1px solid #f1f4f6;color:#33475c;vertical-align:middle}
+table.admin-table tbody tr:last-child td{border-bottom:0}
+table.admin-table tbody tr:hover{background:#fafbfc}
+.row-actions{display:flex;gap:4px;justify-content:flex-end}
+
+.badge{display:inline-flex;align-items:center;gap:4px;border-radius:20px;padding:4px 10px;font-size:9.5px;font-weight:700;white-space:nowrap}
+.badge--confirmed,.badge--checked-in,.badge--active,.badge--approved,.badge--paid{background:#e0f5e8;color:#29905f}
+.badge--pending,.badge--pending-payment,.badge--maintenance{background:#fff0d5;color:#b57a1b}
+.badge--cancelled,.badge--inactive,.badge--hidden,.badge--blocked{background:#fbe2e4;color:#bf5358}
+.badge--checked-out,.badge--other{background:#e5edf4;color:#668096}
+.badge--staff{background:#eef1f4;color:#4d6879}
+.badge--admin{background:#e3f0fd;color:#2f6fa8}
+.badge--super_admin{background:#efe4ff;color:#8050ba}
+
+.admin-pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 2px 2px;color:#7c8ba0;font-size:10.5px;flex-wrap:wrap}
+.admin-pagination__pages{display:flex;gap:4px}
+.admin-pagination__pages button{width:26px;height:26px;border:1px solid #dfe6ea;border-radius:4px;background:#fff;color:#4d6879;font-size:10.5px}
+.admin-pagination__pages button.active{background:var(--navy);border-color:var(--navy);color:#fff}
+.admin-pagination__pages button:disabled{opacity:.4;cursor:not-allowed}
+
+.error-state{background:#fff7f2;border:1px solid #f1d4b4;color:#9a5b24;padding:14px 16px;border-radius:6px;font-size:11.5px;display:flex;align-items:center;gap:10px}
+.not-connected{background:#f4f7fa;border:1px dashed #cdd8e0;color:#5f7186;padding:12px 14px;border-radius:6px;font-size:10.5px;display:flex;align-items:flex-start;gap:9px;margin-top:10px}
+.not-connected svg{flex:none;margin-top:1px;color:#8ea0b3}
+
+.admin-modal-backdrop{position:fixed;inset:0;background:rgba(9,26,42,.5);display:grid;place-items:center;padding:20px;z-index:80}
+.admin-modal{background:#fff;border-radius:8px;width:min(100%,460px);max-height:88vh;overflow:auto;padding:24px}
+.admin-modal--wide{width:min(100%,720px)}
+.admin-modal h2{margin:0 0 8px;font-size:18px;color:var(--navy)}
+.admin-modal__close{position:absolute;top:14px;right:14px}
+.admin-modal-backdrop{position:fixed}
+
+.admin-form{display:grid;gap:14px}
+.admin-form__row{display:grid;gap:14px;grid-template-columns:repeat(2,1fr)}
+.admin-form label{display:grid;gap:6px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:#4d6879}
+.admin-form input,.admin-form select,.admin-form textarea{border:1px solid #dbe5e8;border-radius:5px;padding:10px 11px;font-size:12px;color:#243646;background:#fff;font-family:var(--sans)}
+.admin-form textarea{resize:vertical;min-height:80px}
+.admin-form__actions{display:flex;justify-content:flex-end;gap:10px;margin-top:6px}
+.admin-form__error{color:#a64d37;font-size:10.5px;margin:-6px 0 0}
+.checkbox-row{display:flex;align-items:center;gap:8px;font-size:11.5px;color:#33475c;flex-direction:row!important}
+.checkbox-row input{width:auto!important}
+
+@media(max-width:760px){
+  .admin-form__row{grid-template-columns:1fr}
+  table.admin-table{font-size:11px}
+}
+
+/* Shared across dashboard + reports (and anywhere else that shows stat
+   cards / a card-with-heading / occupancy bars) - promoted here so it isn't
+   trapped inside admin-dashboard's view encapsulation. */
+.admin-card-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #edf0f3;padding-bottom:11px;margin-bottom:11px;gap:10px}
+.admin-card-head h2{margin:0;color:#1a3554;font-size:14px}
+.admin-card-head p{margin:3px 0 0;color:#8794a0;font-size:9px}
+.admin-empty{color:#8a98a4;text-align:center;font-size:10px;padding:25px 7px}
+.admin-note{color:#8a97a3;font-size:9px;margin:10px 0 0;line-height:1.5}
+.admin-note code{background:#f2f5f8;padding:1px 4px;border-radius:3px}
+
+.dashboard__grid{display:grid;gap:12px}
+.dashboard__stats{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin:18px 0}
+.stat-card{min-height:84px;padding:13px 10px;background:#fff;border:1px solid #e8edf2;border-radius:4px;display:flex;gap:9px;align-items:flex-start;box-shadow:0 3px 12px rgba(31,65,95,.04)}
+.stat-card>div{min-width:0}
+.stat-card>span:first-child{width:29px;height:29px;display:grid;place-items:center;border-radius:4px;font-size:14px}
+.stat-card span:not(.stat-icon){display:block;color:#65778a;font-size:9px;white-space:nowrap}
+.stat-card strong{display:block;margin:3px 0 1px;color:#122d50;font-size:20px;line-height:1.1}
+.stat-card small{display:block;color:#92a0ad;font-size:8px;white-space:nowrap}
+.stat-card .positive{color:#36a36d}
+.stat-card--blue .stat-icon{background:#e3f0fd;color:#317bc1}
+.stat-card--green .stat-icon{background:#e0f6e9;color:#3aa66d}
+.stat-card--gold .stat-icon{background:#fff1cf;color:#ce9220}
+.stat-card--purple .stat-icon{background:#efe4ff;color:#8050ba}
+.stat-card--red .stat-icon{background:#ffe3e2;color:#d35a5b}
+.stat-card--teal .stat-icon{background:#dff5f4;color:#259e9c}
+
+.occupancy-row{display:grid;grid-template-columns:100px 1fr 32px;gap:6px;align-items:center;margin:14px 0;color:#667b8c;font-size:8px}
+.occupancy-row>div{height:8px;background:#e9eef3;border-radius:2px;overflow:hidden}
+.occupancy-row i{display:block;height:100%;background:#3677a6;border-radius:2px}
+.occupancy-row:nth-of-type(2) i{background:#42b8b5}
+.occupancy-row:nth-of-type(3) i{background:#f2a21d}
+.occupancy-row strong{text-align:right;color:#47647b;font-size:8px}
+
+@media(max-width:1150px){
+  .dashboard__stats{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:800px){
+  .dashboard__stats{grid-template-columns:repeat(2,1fr);gap:7px}
+  .stat-card{padding:10px 7px}
+  .stat-card span:not(.stat-icon){font-size:8px}
+}
+
+.toast-stack{position:fixed;top:18px;right:18px;z-index:120;display:flex;flex-direction:column;gap:8px;max-width:320px}
+.toast{display:flex;align-items:center;gap:9px;background:#173a5a;color:#fff;border-radius:6px;padding:11px 13px;font-size:11.5px;box-shadow:0 8px 24px rgba(9,26,42,.25);animation:nh-rise-in .2s ease-out}
+.toast svg{color:#4fd08a;flex:none}
+.toast--error svg{color:#ff9a8c}
+.toast button{margin-left:auto;border:0;background:none;color:#b9ccdc;display:inline-flex}
+.toast button:hover{color:#fff}

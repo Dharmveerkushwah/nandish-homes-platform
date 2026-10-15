@@ -1,0 +1,53 @@
+<section class="admin-page">
+  <div class="admin-page__head">
+    <div><h1>Content management</h1><p>Edit the copy shown across the public site.</p></div>
+    <div class="admin-page__actions">
+      <button class="button button--solid button--sm" type="button" [disabled]="saving()" (click)="save()">{{ saving() ? 'Saving…' : 'Save changes' }}</button>
+    </div>
+  </div>
+
+  @if (!connected() && !loading()) {
+    <nh-not-connected>No /api/admin/content endpoint is available yet — this form is seeded from the site's current live copy in <code>site-content.ts</code>. Saving will attempt the API and tell you honestly if it fails.</nh-not-connected>
+  }
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading content…</span></div>
+  } @else {
+    <div class="admin-card" style="margin-top:14px">
+      <div class="admin-card-head"><div><h2>Homepage hero</h2></div></div>
+      <div class="admin-form">
+        <label>Hero title<input type="text" [(ngModel)]="form.heroTitle" /></label>
+        <label>Hero subtitle<input type="text" [(ngModel)]="form.heroSubtitle" /></label>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-head"><div><h2>About Us summary</h2></div></div>
+      <div class="admin-form"><label>Summary<textarea rows="4" [(ngModel)]="form.aboutSummary"></textarea></label></div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-head"><div><h2>Call to action</h2></div></div>
+      <div class="admin-form">
+        <label>CTA title<input type="text" [(ngModel)]="form.ctaTitle" /></label>
+        <label>CTA subtitle<input type="text" [(ngModel)]="form.ctaSubtitle" /></label>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-head"><div><h2>Contact information</h2></div></div>
+      <div class="admin-form">
+        <label>Address<input type="text" [(ngModel)]="form.contactAddress" /></label>
+        <div class="admin-form__row">
+          <label>Phone<input type="text" [(ngModel)]="form.contactPhone" /></label>
+          <label>Email<input type="email" [(ngModel)]="form.contactEmail" /></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-head"><div><h2>Footer note</h2></div></div>
+      <div class="admin-form"><label>Footer tagline<input type="text" [(ngModel)]="form.footerNote" /></label></div>
+    </div>
+  }
+</section>

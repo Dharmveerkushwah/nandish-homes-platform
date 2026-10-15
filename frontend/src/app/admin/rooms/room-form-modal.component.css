@@ -1,0 +1,7 @@
+:host{position:relative}
+.admin-modal{position:relative}
+.detail-note{color:#5f7186;font-size:10.5px;line-height:1.6;margin:0 0 10px}
+.room-image-list{display:grid;gap:8px;margin-top:12px}
+.room-image-list__item{display:flex;align-items:center;gap:10px;border:1px solid #edf1f4;border-radius:6px;padding:8px 10px}
+.room-image-list__item img{width:52px;height:40px;object-fit:cover;border-radius:4px;flex:none}
+.room-image-list__url{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:10px;color:#5c7186}

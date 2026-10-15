@@ -1,0 +1,3 @@
+.legal-sections{display:grid;gap:26px;max-width:760px}
+.legal-sections h2{font-family:var(--serif);font-size:19px;color:var(--navy);margin:0 0 8px}
+.legal-sections p{color:#5c7180;font-size:12.5px;line-height:1.75;margin:0}

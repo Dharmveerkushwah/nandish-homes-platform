@@ -1,0 +1,83 @@
+<section class="admin-page">
+  <div class="admin-page__head">
+    <div><h1>Reports</h1><p>Revenue, bookings, occupancy and cancellations for the selected period.</p></div>
+  </div>
+
+  <div class="admin-toolbar">
+    <div class="tab-pills">
+      <button type="button" class="tab-pill" [class.active]="preset() === 'today'" (click)="preset.set('today')">Today</button>
+      <button type="button" class="tab-pill" [class.active]="preset() === 'week'" (click)="preset.set('week')">This week</button>
+      <button type="button" class="tab-pill" [class.active]="preset() === 'month'" (click)="preset.set('month')">This month</button>
+      <button type="button" class="tab-pill" [class.active]="preset() === 'custom'" (click)="preset.set('custom')">Custom range</button>
+    </div>
+    @if (preset() === 'custom') {
+      <input class="admin-select" type="date" [ngModel]="customFrom()" (ngModelChange)="customFrom.set($event)" aria-label="From date" />
+      <input class="admin-select" type="date" [ngModel]="customTo()" (ngModelChange)="customTo.set($event)" aria-label="To date" />
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading report data…</span></div>
+  } @else if (error()) {
+    <div class="empty-state"><p>Some report data could not be loaded. Showing what's available; try refreshing.</p></div>
+  } @else {
+    <div class="dashboard__stats report-stats">
+      <article class="stat-card stat-card--gold"><span class="stat-icon">₹</span><div><span>Revenue</span><strong>{{ totalRevenue() | currency:'INR':'symbol-narrow':'1.0-0' }}</strong><small>In selected range</small></div></article>
+      <article class="stat-card stat-card--blue"><span class="stat-icon">▣</span><div><span>Bookings</span><strong>{{ totalBookings() }}</strong><small>Confirmed / checked in / out</small></div></article>
+      <article class="stat-card stat-card--purple"><span class="stat-icon">₹</span><div><span>Avg. booking value</span><strong>{{ averageBookingValue() | currency:'INR':'symbol-narrow':'1.0-0' }}</strong><small>Per active booking</small></div></article>
+      <article class="stat-card stat-card--red"><span class="stat-icon">✕</span><div><span>Cancellation rate</span><strong>{{ cancellationRate() }}%</strong><small>{{ totalCancelled() }} cancelled</small></div></article>
+    </div>
+
+    <div class="dashboard__grid report-grid-2">
+      <section class="admin-card">
+        <div class="admin-card-head"><div><h2>Revenue trend</h2><p>By check-in date</p></div><button class="text-link" type="button" (click)="exportCsv('bookings')"><nh-icon name="download" [size]="12" /> Export bookings CSV</button></div>
+        <nh-line-chart [points]="revenueTrend()" />
+      </section>
+      <section class="admin-card">
+        <div class="admin-card-head"><div><h2>Occupancy by category</h2></div></div>
+        @for (row of occupancyByCategory(); track row.key) {
+          <div class="occupancy-row"><span>{{ row.label }}</span><div><i [style.width.%]="row.pct"></i></div><strong>{{ row.pct }}%</strong></div>
+        }
+        @if (!occupancyByCategory().length) { <p class="admin-empty">No room data.</p> }
+      </section>
+    </div>
+
+    <section class="admin-card" style="margin-top:12px">
+      <div class="admin-card-head"><div><h2>Room performance</h2><p>Bookings and revenue per room in range</p></div><button class="text-link" type="button" (click)="exportCsv('room-performance')"><nh-icon name="download" [size]="12" /> Export CSV</button></div>
+      @if (!roomPerformance().length) {
+        <p class="admin-empty">No bookings in this range.</p>
+      } @else {
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Room</th><th>Category</th><th>Bookings</th><th>Revenue</th></tr></thead>
+            <tbody>
+              @for (row of roomPerformance(); track row.roomId) {
+                <tr><td>{{ row.name }}</td><td>{{ row.category }}</td><td>{{ row.bookings }}</td><td>{{ row.revenue | currency:'INR':'symbol-narrow':'1.0-0' }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <section class="admin-card" style="margin-top:12px">
+      <div class="admin-card-head"><div><h2>Cancellations</h2><p>{{ totalCancelled() }} in range</p></div><button class="text-link" type="button" (click)="exportCsv('cancellations')"><nh-icon name="download" [size]="12" /> Export CSV</button></div>
+      @if (!cancellations().length) {
+        <p class="admin-empty">No cancellations in this range.</p>
+      } @else {
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead><tr><th>Reference</th><th>Guest</th><th>Room</th><th>Check-in</th><th>Amount</th></tr></thead>
+            <tbody>
+              @for (booking of cancellations(); track booking.reference) {
+                <tr><td>{{ booking.reference }}</td><td>{{ booking.guestName ?? 'Guest' }}</td><td>{{ booking.room.name }}</td><td>{{ booking.checkIn | date:'d MMM yyyy' }}</td><td>{{ booking.totalAmount | currency:'INR':'symbol-narrow':'1.0-0' }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+
+    <p class="admin-note" style="margin-top:10px">Exports are CSV, generated in the browser from the same data shown above. Excel/PDF export would need a backend export service or a library this environment can't install.</p>
+  }
+</section>

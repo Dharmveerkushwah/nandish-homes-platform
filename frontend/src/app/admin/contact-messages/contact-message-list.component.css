@@ -1,0 +1,13 @@
+:host{display:block}
+.contact-message-list{display:flex;flex-direction:column;gap:8px}
+.contact-message-row{border:1px solid #edf1f4;border-radius:6px;background:#fff}
+.contact-message-row.unread{border-color:#c9dcee;background:#f6faff}
+.contact-message-row__head{display:flex;align-items:center;gap:14px;padding:12px 14px;cursor:pointer}
+.contact-message-row__head > div{flex:1;min-width:0}
+.contact-message-row__head strong{display:block;color:#1a3554;font-size:12.5px}
+.contact-message-row__meta{color:#5c7186;font-size:11px}
+.contact-message-row__head time{color:#8a9bab;font-size:10.5px;white-space:nowrap}
+.contact-message-row__body{padding:0 14px 14px;border-top:1px solid #f1f4f6}
+.contact-message-row__body p{margin:12px 0;color:#33475c;font-size:12px;line-height:1.6;white-space:pre-wrap}
+.contact-message-row__actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.contact-message-row__actions select{border:1px solid #dbe5e8;border-radius:5px;padding:7px 9px;font-size:11px}

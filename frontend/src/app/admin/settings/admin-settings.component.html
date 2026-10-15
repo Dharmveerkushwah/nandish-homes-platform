@@ -1,0 +1,54 @@
+<section class="admin-page">
+  <div class="admin-page__head">
+    <div><h1>Settings</h1><p>Property, booking, payment and notification configuration.</p></div>
+    <div class="admin-page__actions"><button class="button button--solid button--sm" type="button" [disabled]="saving()" (click)="save()">{{ saving() ? 'Saving…' : 'Save changes' }}</button></div>
+  </div>
+
+  @if (!connected() && !loading()) {
+    <nh-not-connected>Could not load saved settings — showing defaults. Check the backend connection or your admin permissions.</nh-not-connected>
+  }
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading settings…</span></div>
+  } @else {
+    <div class="admin-card" style="margin-top:14px">
+      <div class="admin-card-head"><div><h2>Property</h2></div></div>
+      <div class="admin-form">
+        <div class="admin-form__row">
+          <label>Property name<input type="text" [(ngModel)]="form.propertyName" /></label>
+          <label>Phone<input type="text" [(ngModel)]="form.phone" /></label>
+        </div>
+        <label>Address<input type="text" [(ngModel)]="form.address" /></label>
+        <div class="admin-form__row">
+          <label>Email<input type="email" [(ngModel)]="form.email" /></label>
+        </div>
+        <div class="admin-form__row">
+          <label>Check-in time<input type="time" [(ngModel)]="form.checkInTime" /></label>
+          <label>Check-out time<input type="time" [(ngModel)]="form.checkOutTime" /></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-head"><div><h2>Booking</h2></div></div>
+      <div class="admin-form">
+        <label>Cancellation policy<textarea rows="2" [(ngModel)]="form.cancellationPolicy"></textarea></label>
+        <label>Guest limit per room<input type="number" min="1" [(ngModel)]="form.guestLimitPerRoom" /></label>
+      </div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-head"><div><h2>Payment</h2></div></div>
+      <div class="admin-form"><label>Gateway note<input type="text" [(ngModel)]="form.paymentGatewayNote" placeholder="e.g. Razorpay — live keys configured by backend" /></label></div>
+    </div>
+
+    <div class="admin-card">
+      <div class="admin-card-head"><div><h2>Notifications</h2></div></div>
+      <div class="admin-form">
+        <label class="checkbox-row"><input type="checkbox" [(ngModel)]="form.notifyEmail" />Email notifications</label>
+        <label class="checkbox-row"><input type="checkbox" [(ngModel)]="form.notifyWhatsapp" />WhatsApp notifications</label>
+        <label class="checkbox-row"><input type="checkbox" [(ngModel)]="form.notifyOnNewBooking" />Notify on new booking</label>
+      </div>
+    </div>
+  }
+</section>

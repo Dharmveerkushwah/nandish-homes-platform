@@ -1,0 +1,16 @@
+:host{display:block}
+.back-link{cursor:pointer}
+.booking-detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:16px}
+.detail-list{display:grid;gap:10px;margin:0}
+.detail-list>div{display:flex;justify-content:space-between;gap:12px;font-size:11.5px;border-bottom:1px solid #f1f4f6;padding-bottom:8px}
+.detail-list>div:last-child{border-bottom:0;padding-bottom:0}
+.detail-list dt{color:#7c8ba0;font-weight:600}
+.detail-list dd{margin:0;color:#243646;text-align:right}
+.detail-note{color:#4a5b6c;font-size:12px;line-height:1.6;margin:0}
+.booking-actions{margin-top:14px}
+
+@media(max-width:800px){
+  .booking-detail-grid{grid-template-columns:1fr}
+  .detail-list>div{flex-direction:column;gap:2px}
+  .detail-list dd{text-align:left}
+}

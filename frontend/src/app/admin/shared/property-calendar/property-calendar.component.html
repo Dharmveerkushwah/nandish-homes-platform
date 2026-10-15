@@ -1,0 +1,56 @@
+<div class="calendar-toolbar">
+  <button type="button" (click)="move(-7)" aria-label="Earlier">‹</button>
+  <strong>{{ days()[0] | date:'MMM d' }} – {{ days()[days().length - 1] | date:'MMM d, yyyy' }}</strong>
+  <button type="button" (click)="move(7)" aria-label="Later">›</button>
+  <button class="today-button" type="button" (click)="resetToToday()">Today</button>
+</div>
+<div class="calendar-scroll">
+  <div class="property-calendar" [style.min-width.px]="145 + days().length * 32">
+    <div class="calendar-row calendar-row--head" [style.grid-template-columns]="rowTemplateColumns()">
+      <div class="room-name">Room / Villa</div>
+      @for (day of days(); track day.getTime()) {
+        <div class="calendar-day" [class.calendar-day--today]="isToday(day)"><b>{{ day | date:'EEE' }}</b><span>{{ day | date:'d' }}</span></div>
+      }
+    </div>
+    @for (room of rooms(); track room.id) {
+      <div class="calendar-row" [style.grid-template-columns]="rowTemplateColumns()">
+        <div class="room-name">
+          <span class="room-thumb" [style.background-image]="'url(' + room.imageUrl + ')'"></span>
+          <span><b>{{ room.name }}</b><small>{{ room.type }} · {{ room.maxGuests }} guests</small></span>
+        </div>
+        @for (day of days(); track day.getTime()) {
+          <button
+            type="button"
+            class="calendar-cell"
+            [class.calendar-cell--today]="isToday(day)"
+            [class.calendar-cell--checkin]="cellState(room, day) === 'checkin'"
+            [class.calendar-cell--checkout]="cellState(room, day) === 'checkout'"
+            [class.calendar-cell--stay]="cellState(room, day) === 'stay'"
+            (click)="onCellClick(room, day)"
+            [attr.aria-label]="room.name + ' ' + (day | date:'d MMM')"
+          >
+            @if (bookingOn(room, day); as booking) {
+              <span class="booking-bar" [class]="'booking-bar--' + statusClass(booking.status)">{{ booking.reference }}</span>
+            } @else {
+              <span class="available-dot"></span>
+            }
+          </button>
+        }
+      </div>
+    }
+    @if (loading()) {
+      <div class="calendar-empty"><span class="spinner-navy" aria-hidden="true"></span> Loading calendar&hellip;</div>
+    } @else if (error()) {
+      <div class="calendar-empty">Calendar could not be loaded right now. Please refresh.</div>
+    } @else if (!rooms().length) {
+      <div class="calendar-empty">No rooms match this view.</div>
+    }
+  </div>
+</div>
+<div class="calendar-legend">
+  <span><i class="legend legend--available"></i>Available</span>
+  <span><i class="legend legend--checkin"></i>Check-in</span>
+  <span><i class="legend legend--stay"></i>Occupied</span>
+  <span><i class="legend legend--checkout"></i>Check-out</span>
+  <span class="legend--muted"><i class="legend legend--maintenance"></i>Maintenance / blocked (needs backend support — not available yet)</span>
+</div>

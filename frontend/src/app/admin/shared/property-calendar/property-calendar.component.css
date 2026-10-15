@@ -1,0 +1,40 @@
+:host{display:block}
+.calendar-toolbar{display:flex;align-items:center;gap:13px;margin:0 2px 10px;color:#2b4158;font-size:11px}
+.calendar-toolbar button{border:0;background:none;color:#49708f;font-size:18px}
+.calendar-toolbar .today-button{margin-left:auto;border:1px solid #d5e0e8;border-radius:3px;padding:5px 9px;color:#39739c;font-size:9px}
+.calendar-scroll{overflow-x:auto}
+.calendar-row{display:grid;min-height:32px}
+.calendar-row--head{min-height:41px}
+.room-name{display:flex;align-items:center;gap:6px;padding:4px;color:#34516b;font-size:9px;border-right:1px solid #edf0f3}
+.room-name>b,.room-name span>b{display:block;font-size:9px;font-weight:700}
+.room-name small{display:block;color:#91a0ad;font-size:7px;margin-top:2px}
+.room-thumb{flex:0 0 28px;height:24px;border-radius:2px;background:center/cover}
+.calendar-day{text-align:center;padding:5px 1px;color:#788c9e;border-bottom:1px solid #edf0f3;font-size:8px}
+.calendar-day--today{background:#eef7fb}
+.calendar-day b{display:block;font-size:7px;font-weight:500}
+.calendar-day span{font-size:10px;color:#2a465d}
+.calendar-cell{position:relative;border:0;border-right:1px solid #f0f3f6;border-bottom:1px solid #f0f3f6;background:#e4f6ed;min-width:0;padding:0;cursor:pointer}
+.calendar-cell--today{box-shadow:inset 0 0 0 1px #268ab0}
+.calendar-cell--stay{background:#f8dfe4}
+.calendar-cell--checkin{background:#d7ecfb}
+.calendar-cell--checkout{background:#fde6c8}
+.booking-bar{position:absolute;inset:7px 0 auto;height:16px;overflow:hidden;white-space:nowrap;padding:3px 2px;color:#fff;font-size:7px;text-align:center;border-radius:2px}
+.booking-bar--confirmed{background:#dc7b89}
+.booking-bar--pending{background:#eba341}
+.booking-bar--checked-in{background:#379bd8}
+.booking-bar--checked-out{background:#86a0b7}
+.booking-bar--cancelled{background:#aab3bb}
+.available-dot{display:block;width:5px;height:5px;border-radius:50%;background:#45bd8c;margin:13px auto}
+.calendar-empty{grid-column:1/-1;text-align:center;color:#8b99a6;padding:20px;font-size:10px}
+.calendar-legend{display:flex;gap:12px;margin-top:10px;color:#7a8997;font-size:8px;flex-wrap:wrap}
+.calendar-legend span{display:flex;align-items:center;gap:4px}
+.calendar-legend .legend--muted{color:#a7b3bc}
+.legend{display:inline-block;width:8px;height:8px;border-radius:2px;background:#e4f6ed}
+.legend--checkin{background:#d7ecfb}
+.legend--stay{background:#f8dfe4}
+.legend--checkout{background:#fde6c8}
+.legend--maintenance{background:#d8dde1}
+
+@media(max-width:640px){
+  .room-name{font-size:8px}
+}

@@ -1,0 +1,120 @@
+<div class="admin-shell">
+  <aside class="admin-sidebar" [class.admin-sidebar--open]="drawerOpen()">
+    <div class="admin-sidebar__brand">
+      <a class="brand brand--light" routerLink="/">NANDISH <span>HOMES</span></a>
+      <button class="admin-sidebar__close" type="button" (click)="closeDrawer()" aria-label="Close menu">
+        <nh-icon name="close" [size]="16" />
+      </button>
+    </div>
+    <p class="admin-sidebar__label">Property console</p>
+    <nav aria-label="Admin navigation">
+      @for (item of navItems; track item.route) {
+      @if (auth.canAccess(item.section)) {
+      <a [routerLink]="item.route" routerLinkActive="admin-sidebar__active">
+        <nh-icon [name]="item.icon" [size]="16" />
+        <span>{{ item.label }}</span>
+      </a>
+      }
+      }
+    </nav>
+    <button class="admin-sidebar__signout" type="button" (click)="signOut()">
+      <nh-icon name="logout" [size]="15" /><span>Sign out</span>
+    </button>
+  </aside>
+
+  @if (drawerOpen()) {
+  <div class="admin-sidebar-backdrop" (click)="closeDrawer()"></div>
+  }
+
+  <div class="admin-main">
+    <header class="admin-header">
+      <button class="admin-header__menu" type="button" (click)="toggleDrawer()" aria-label="Open menu">
+        <nh-icon name="menu" [size]="18" />
+      </button>
+
+      <div class="admin-header__visual" aria-hidden="true">
+        <div class="admin-header__visual-overlay"></div>
+        <div class="admin-header__visual-copy">
+          <strong>Create memorable stays</strong>
+          <span>in Pondicherry</span>
+        </div>
+      </div>
+
+      <div class="admin-search admin-header__search">
+        <nh-icon name="search" [size]="14" />
+        <input type="search" placeholder="Search bookings, guests, rooms…" [ngModel]="query()"
+          (ngModelChange)="onSearch($event)" (focus)="searchOpen.set(true)" />
+        @if (searchOpen() && query().trim()) {
+        <div class="admin-header__panel admin-header__panel--search">
+          @if (searchResults().length) {
+          @for (result of searchResults(); track result.id) {
+          <button type="button" class="admin-search-result" (click)="goToResult(result)">
+            <span class="admin-search-result__category">{{ result.category }}</span>
+            <span><strong>{{ result.label }}</strong><small>{{ result.sub }}</small></span>
+          </button>
+          }
+          } @else {
+          <p class="admin-header__panel-empty">No matches in loaded bookings or rooms.</p>
+          }
+        </div>
+        }
+      </div>
+
+      <div class="admin-header__actions">
+        <div class="admin-header__notif">
+          <button class="icon-btn" type="button" (click)="toggleNotifications()" aria-label="Notifications">
+            <nh-icon name="bell" [size]="18" />
+            @if (notifications.unreadCount() > 0) { <span class="notif-dot">{{ notifications.unreadCount() }}</span> }
+          </button>
+          @if (notifOpen()) {
+          <div class="admin-header__panel admin-header__panel--notif">
+            <div class="admin-header__panel-head">
+              <strong>Notifications</strong>
+              <button type="button" class="text-link" (click)="markAllNotificationsRead()">Mark all read</button>
+            </div>
+            @if (!notifications.items().length) {
+            <p class="admin-header__panel-empty">You're all caught up — nothing new right now.</p>
+            }
+            @for (item of notifications.items(); track item.id) {
+            <div class="admin-notif-item" [class.unread]="!notifications.isRead(item.id)"
+              (click)="notifications.markRead(item.id)">
+              <span class="admin-notif-item__dot" [class]="'admin-notif-item__dot--' + item.kind"></span>
+              <p>{{ item.message }}</p>
+            </div>
+            }
+          </div>
+          }
+        </div>
+
+        <div class="admin-header__profile">
+          <button class="admin-header__avatar" type="button" (click)="toggleProfile()">
+            <span class="admin-avatar">{{ initials }}</span>
+            <span class="admin-user"><strong>{{ auth.getDisplayName() }}</strong><small>{{ roleLabel }}</small></span>
+            <nh-icon name="chevron-down" [size]="12" />
+          </button>
+          @if (profileOpen()) {
+          <div class="admin-header__panel admin-header__panel--profile">
+            <a routerLink="/admin/settings"><nh-icon name="settings" [size]="14" /> Settings</a>
+            <button type="button" (click)="signOut()"><nh-icon name="logout" [size]="14" /> Sign out</button>
+          </div>
+          }
+        </div>
+      </div>
+    </header>
+
+    @if (data.error()) {
+    <div class="admin-shell__alert error-state">
+      <nh-icon name="alert" [size]="14" />
+      <span>{{ data.error() }}</span>
+      <button class="text-link" type="button" (click)="data.refresh()">Retry</button>
+    </div>
+    }
+
+    <div class="admin-content">
+      <router-outlet />
+    </div>
+  </div>
+</div>
+
+<nh-confirm-dialog />
+<nh-toast-stack />

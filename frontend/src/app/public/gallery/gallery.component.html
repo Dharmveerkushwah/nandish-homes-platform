@@ -1,0 +1,56 @@
+<main class="page-shell page-shell--narrow">
+  <a class="back-link" routerLink="/"><nh-icon name="chevron-left" [size]="12" /> Back home</a>
+
+  <div class="page-intro">
+    <p class="eyebrow">Gallery</p>
+    <h1>Take a visual tour<br /><em>of Nandish Homes.</em></h1>
+    <p>Villas, rooms, the property and Pondicherry itself &mdash; a look at what’s waiting for you.</p>
+  </div>
+
+  <div class="filter-tabs" role="tablist" aria-label="Filter gallery by category">
+    @for (tab of tabs; track tab.key) {
+      <button type="button" role="tab" [attr.aria-selected]="activeFilter() === tab.key" [class.active]="activeFilter() === tab.key" (click)="setFilter(tab.key)">
+        {{ tab.label }}
+      </button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner-navy" aria-hidden="true"></span> Loading photos&hellip;</div>
+  } @else if (error()) {
+    <div class="empty-state"><nh-icon name="alert" [size]="22" /><p>Gallery photos could not be loaded right now. Please refresh or reach us on WhatsApp.</p></div>
+  } @else {
+    <div class="masonry">
+      @for (image of filteredImages(); track image.url; let i = $index) {
+        <button type="button" class="masonry__item" (click)="open(i)">
+          <img [src]="image.url" [alt]="image.alt" loading="lazy" nhImgFallback="Gallery photo" />
+          <span class="masonry__zoom"><nh-icon name="search" [size]="16" /></span>
+        </button>
+      }
+      @if (!filteredImages().length) {
+        <div class="empty-state"><nh-icon name="image-off" [size]="22" /><p>No photos in this category yet.</p></div>
+      }
+    </div>
+  }
+</main>
+
+@if (lightboxIndex() !== null) {
+  <div class="lightbox" role="dialog" aria-modal="true" aria-label="Photo viewer" (click)="close()">
+    <button class="lightbox__close" type="button" (click)="close(); $event.stopPropagation()" aria-label="Close">
+      <nh-icon name="close" [size]="20" />
+    </button>
+    <button class="lightbox__nav lightbox__nav--prev" type="button" (click)="prev(); $event.stopPropagation()" aria-label="Previous photo">
+      <nh-icon name="chevron-left" [size]="22" />
+    </button>
+    <img
+      [src]="filteredImages()[lightboxIndex()!].url"
+      [alt]="filteredImages()[lightboxIndex()!].alt"
+      (click)="$event.stopPropagation()"
+      nhImgFallback="Gallery photo"
+    />
+    <button class="lightbox__nav lightbox__nav--next" type="button" (click)="next(); $event.stopPropagation()" aria-label="Next photo">
+      <nh-icon name="chevron-right" [size]="22" />
+    </button>
+    <p class="lightbox__caption">{{ filteredImages()[lightboxIndex()!].alt }} &middot; {{ lightboxIndex()! + 1 }} / {{ filteredImages().length }}</p>
+  </div>
+}

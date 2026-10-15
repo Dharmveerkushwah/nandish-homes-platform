@@ -1,0 +1,63 @@
+<section class="admin-page">
+  <div class="admin-page__head">
+    <div>
+      <h1>Guests</h1>
+      <p>Every guest who has booked, grouped from real reservation data.</p>
+    </div>
+  </div>
+
+  <nh-not-connected>
+    There's no dedicated guest-record API yet (see gap doc endpoint list) — this view is built from real booking data grouped by guest, so contact details are only as complete as what each booking includes.
+  </nh-not-connected>
+
+  <div class="admin-toolbar" style="margin-top:14px">
+    <div class="admin-search">
+      <nh-icon name="search" [size]="14" />
+      <input type="search" placeholder="Search guests…" [ngModel]="search()" (ngModelChange)="onSearch($event)" />
+    </div>
+  </div>
+
+  @if (data.loading()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading guests…</span></div>
+  } @else if (!filtered().length) {
+    <div class="empty-state"><nh-icon name="users" [size]="22" /><p>No guests match this search.</p></div>
+  } @else {
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>Guest</th><th>Email</th><th>Phone</th><th>Total bookings</th><th>Current stay</th><th></th></tr></thead>
+        <tbody>
+          @for (guest of paged(); track guest.key) {
+            <tr (click)="open(guest)">
+              <td><strong>{{ guest.name }}</strong></td>
+              <td>{{ guest.email ?? '—' }}</td>
+              <td>{{ guest.phone ?? '—' }}</td>
+              <td>{{ guest.totalBookings }}</td>
+              <td>@if (currentStay(guest); as stay) { <span class="badge badge--checked-in">{{ stay.room.name }}</span> } @else { <span class="badge badge--other">None</span> }</td>
+              <td class="row-actions"><button class="icon-btn" type="button" (click)="open(guest); $event.stopPropagation()" aria-label="View guest"><nh-icon name="eye" [size]="15" /></button></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <nh-pagination [total]="filtered().length" [pageSize]="pageSize" [page]="page()" (pageChange)="page.set($event)" />
+  }
+</section>
+
+@if (selected(); as guest) {
+  <div class="admin-modal-backdrop" (click)="close()">
+    <div class="admin-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+      <h2>{{ guest.name }}</h2>
+      <p class="detail-note">{{ guest.email ?? 'No email on file' }} · {{ guest.phone ?? 'No phone on file' }}</p>
+      <h3 class="guest-modal__subhead">Booking history ({{ guest.totalBookings }})</h3>
+      <div class="room-image-list">
+        @for (booking of guest.bookings; track booking.reference) {
+          <div class="room-image-list__item">
+            <span class="room-image-list__url"><strong>{{ booking.reference }}</strong> · {{ booking.room.name }} · {{ booking.checkIn | date:'d MMM' }} – {{ booking.checkOut | date:'d MMM yyyy' }}</span>
+            <span [class]="'badge badge--' + statusClass(booking.status)">{{ booking.status }}</span>
+          </div>
+        }
+      </div>
+      <div class="admin-form__actions"><button class="button button--ghost" type="button" (click)="close()">Close</button></div>
+    </div>
+  </div>
+}

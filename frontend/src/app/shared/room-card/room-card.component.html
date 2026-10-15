@@ -1,0 +1,21 @@
+<article class="room-card">
+  <a class="room-card__image" [routerLink]="['/rooms', room().slug]">
+    <img [src]="room().imageUrl" [alt]="room().name" loading="lazy" [nhImgFallback]="room().name" />
+    @if (room().featured) {
+      <span class="room-card__badge"><nh-icon name="star" [size]="10" /> Guest favourite</span>
+    }
+    <span class="room-card__image-label">{{ room().type }}</span>
+  </a>
+  <div class="room-card__body">
+    <div class="room-card__topline">
+      <span><nh-icon name="ruler" [size]="12" /> {{ room().sizeSqft }} sq ft</span>
+      <span><nh-icon name="users" [size]="12" /> Up to {{ room().maxGuests }} guests</span>
+    </div>
+    <a [routerLink]="['/rooms', room().slug]" class="room-card__title"><h3>{{ room().name }}</h3></a>
+    <p>{{ room().description }}</p>
+    <div class="room-card__footer">
+      <div><strong>{{ room().pricePerNight | currency:'INR':'symbol-narrow':'1.0-0' }}</strong><span> / night</span></div>
+      <button class="text-button" type="button" (click)="select.emit(room())">Book now <span>&rarr;</span></button>
+    </div>
+  </div>
+</article>

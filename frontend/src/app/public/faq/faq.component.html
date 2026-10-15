@@ -1,0 +1,44 @@
+<main class="page-shell page-shell--narrow">
+  <a class="back-link" routerLink="/"><nh-icon name="chevron-left" [size]="12" /> Back home</a>
+
+  <div class="page-intro">
+    <p class="eyebrow">FAQ</p>
+    <h1>Questions,<br /><em>answered.</em></h1>
+    <p>Everything guests usually ask about booking, check-in, cancellations and more. Still stuck? Reach us on WhatsApp any time.</p>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner-navy" aria-hidden="true"></span> Loading FAQs&hellip;</div>
+  } @else if (error()) {
+    <div class="empty-state"><nh-icon name="alert" [size]="22" /><p>FAQs could not be loaded right now. Please refresh or reach us on WhatsApp.</p></div>
+  } @else if (!items().length) {
+    <div class="empty-state"><nh-icon name="alert" [size]="22" /><p>No FAQs to show yet.</p></div>
+  } @else {
+    <div class="faq-groups">
+      @for (group of grouped(); track group.category) {
+        <section class="faq-group">
+          <h2>{{ group.category }}</h2>
+          <div class="faq-list">
+            @for (item of group.items; track item.question) {
+              <div class="faq-item" [class.open]="openKey() === item.question">
+                <button class="faq-item__q" type="button" (click)="toggle(item.question)" [attr.aria-expanded]="openKey() === item.question">
+                  <span>{{ item.question }}</span>
+                  <nh-icon name="chevron-down" [size]="16" />
+                </button>
+                @if (openKey() === item.question) {
+                  <p class="faq-item__a">{{ item.answer }}</p>
+                }
+              </div>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+
+  <div class="faq-cta">
+    <p>Didn’t find your answer?</p>
+    <a class="button button--solid" routerLink="/contact">Contact us <span>&rarr;</span></a>
+    <a class="button button--whatsapp" href="https://wa.me/919862986851" target="_blank" rel="noopener"><nh-icon name="whatsapp" [size]="15" /> Chat on WhatsApp</a>
+  </div>
+</main>

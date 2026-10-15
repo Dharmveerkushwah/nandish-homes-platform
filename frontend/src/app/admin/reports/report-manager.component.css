@@ -1,0 +1,6 @@
+:host{display:block}
+.report-stats{grid-template-columns:repeat(4,1fr)}
+.report-grid-2{grid-template-columns:1.4fr 1fr}
+@media(max-width:900px){
+  .report-grid-2{grid-template-columns:1fr}
+}

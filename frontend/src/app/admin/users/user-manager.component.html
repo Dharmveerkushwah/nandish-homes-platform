@@ -1,0 +1,77 @@
+<section class="admin-page">
+  <div class="admin-page__head">
+    <div><h1>Users &amp; roles</h1><p>Manage who can access the admin console and what they can do.</p></div>
+    <div class="admin-page__actions"><button class="button button--solid button--sm" type="button" (click)="startAdd()"><nh-icon name="plus" [size]="13" />Add user</button></div>
+  </div>
+
+  @if (error()) { <nh-not-connected>{{ error() }}</nh-not-connected> }
+
+  @if (editing()) {
+    <div class="admin-card" style="margin:14px 0">
+      <div class="admin-card-head"><div><h2>{{ editing() === 'new' ? 'New user' : 'Edit user' }}</h2></div></div>
+      <div class="admin-form">
+        <div class="admin-form__row">
+          <label>Full name<input type="text" [(ngModel)]="draft.name" /></label>
+          <label>Email<input type="email" [(ngModel)]="draft.email" [disabled]="editing() !== 'new'" /></label>
+        </div>
+        @if (editing() !== 'new') { <p class="detail-note">Email can't be changed after the account is created.</p> }
+        <label>Roles (a user can hold more than one)</label>
+        <div class="admin-form__row" style="flex-wrap:wrap;gap:10px">
+          @for (role of allRoles; track role) {
+            <span class="checkbox-row">
+              <input type="checkbox" [id]="'role-' + role" [checked]="draft.roles.includes(role)" (change)="toggleDraftRole(role, $any($event.target).checked)" />
+              <label [for]="'role-' + role" style="text-transform:none;font-weight:500">{{ roleLabels[role] }}</label>
+            </span>
+          }
+        </div>
+        @if (editing() === 'new') { <label>Temporary password<input type="password" [(ngModel)]="draft.password" placeholder="At least 8 characters" /></label> }
+        <div class="admin-form__actions">
+          <button class="button button--ghost" type="button" (click)="cancelEdit()">Cancel</button>
+          <button class="button button--solid" type="button" [disabled]="saving() || !draft.name.trim() || !draft.email.trim() || !draft.roles.length" (click)="save()">{{ saving() ? 'Saving…' : 'Save' }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (resetting(); as user) {
+    <div class="admin-card" style="margin:14px 0">
+      <div class="admin-card-head"><div><h2>Reset password for {{ user.name }}</h2></div></div>
+      <div class="admin-form">
+        <label>New password<input type="password" [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" placeholder="At least 8 characters" /></label>
+        <div class="admin-form__actions">
+          <button class="button button--ghost" type="button" (click)="cancelResetPassword()">Cancel</button>
+          <button class="button button--solid" type="button" [disabled]="resettingBusy() || newPassword().length < 8" (click)="confirmResetPassword()">{{ resettingBusy() ? 'Saving…' : 'Set new password' }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading users…</span></div>
+  } @else if (!users().length) {
+    <div class="empty-state"><nh-icon name="shield" [size]="22" /><p>No admin users found.</p></div>
+  } @else {
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>Name</th><th>Email</th><th>Roles</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          @for (user of users(); track user.id) {
+            <tr>
+              <td><strong>{{ user.name }}</strong></td>
+              <td>{{ user.email }}</td>
+              <td>
+                @for (role of user.roles; track role) { <span class="badge" [class]="'badge--' + role.toLowerCase()" style="margin-right:4px">{{ roleLabels[role] }}</span> }
+              </td>
+              <td><span class="badge" [class]="'badge--' + ((user.active ?? true) ? 'active' : 'inactive')">{{ (user.active ?? true) ? 'Active' : 'Inactive' }}</span></td>
+              <td class="row-actions">
+                <button class="icon-btn" type="button" (click)="startEdit(user)" aria-label="Edit user"><nh-icon name="edit" [size]="14" /></button>
+                <button class="icon-btn" type="button" (click)="startResetPassword(user)" aria-label="Reset password"><nh-icon name="lock" [size]="14" /></button>
+                <button class="icon-btn" type="button" (click)="toggleActive(user)" [attr.aria-label]="(user.active ?? true) ? 'Deactivate' : 'Activate'"><nh-icon [name]="(user.active ?? true) ? 'ban' : 'check'" [size]="14" /></button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

@@ -1,0 +1,10 @@
+:host{display:block}
+.gallery-admin-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.gallery-admin-card{background:#fff;border:1px solid #e8edf2;border-radius:6px;overflow:hidden;box-shadow:0 3px 14px rgba(31,65,95,.04)}
+.gallery-admin-card__image{position:relative;height:130px}
+.gallery-admin-card__image img{width:100%;height:100%;object-fit:cover;display:block}
+.gallery-admin-card__image .badge{position:absolute;top:8px;right:8px}
+.gallery-admin-card__body{padding:10px 12px}
+.gallery-admin-card__category{margin:0;font-size:8.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--blue,#11638b);font-weight:700}
+.gallery-admin-card__caption{margin:4px 0 8px;font-size:11px;color:#33475c}
+.room-admin-card__actions{display:flex;justify-content:flex-end;gap:2px;padding:6px 10px;border-top:1px solid #f1f4f6}

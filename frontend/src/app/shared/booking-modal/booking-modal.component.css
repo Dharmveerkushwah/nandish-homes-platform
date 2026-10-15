@@ -1,0 +1,88 @@
+.modal-backdrop{position:fixed;z-index:60;inset:0;background:rgba(5,40,61,.72);display:grid;place-items:center;padding:20px;animation:fade-in .18s ease-out}
+.booking-modal{position:relative;background:#fff;border-radius:10px;width:min(100%,490px);max-height:92vh;overflow:auto;padding:35px;box-shadow:0 24px 60px rgba(8,45,73,.35);animation:pop-in .22s cubic-bezier(.2,.8,.3,1)}
+.modal-close{position:absolute;right:16px;top:16px;border:0;background:#f0f3f2;color:var(--navy);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;transition:background .15s}
+.modal-close:hover{background:#e2e7e6}
+.booking-modal h2{font-size:38px;color:var(--navy);margin-bottom:5px}
+.modal-room{margin:0 0 21px;color:#788993;font-size:11px}
+.guest-form{display:grid;gap:12px}
+.guest-form label{font-size:9px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#5c7180}
+.guest-form input,.guest-form textarea{display:block;border:1px solid #dce5e7;border-radius:5px;background:#fff;width:100%;margin-top:5px;padding:10px 11px;color:var(--ink);font-size:13px;outline-color:var(--gold);resize:vertical;transition:border-color .15s,box-shadow .15s}
+.guest-form input:focus,.guest-form textarea:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(196,155,62,.15)}
+.guest-form input.input-error,.guest-form textarea.input-error{border-color:#c2543f}
+.field-error{display:flex;align-items:center;gap:5px;margin-top:5px;color:#b24c3b;font-size:10px;font-weight:600;text-transform:none;letter-spacing:0}
+.summary-card{border:1px solid var(--line);border-radius:8px;padding:12px 14px;display:grid;gap:8px;background:#fbfaf7}
+.summary-row{display:flex;justify-content:space-between;font-size:11px;color:#5c7180}
+.summary-row strong{color:var(--navy);font-weight:700}
+.summary-row--total{border-top:1px dashed var(--line);padding-top:8px;font-size:12px}
+.summary-row--total strong{font-size:16px}
+.form-note{color:#7d8b83;font-size:10px;display:flex;align-items:center;gap:6px;margin:4px 0 0}
+.form-note--error{color:#a64d37;font-weight:600}
+.spinner{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;animation:spin .7s linear infinite;margin-right:6px}
+.confirmation{text-align:center}
+.confirmation__icon{width:52px;height:52px;border-radius:50%;background:#dff2e6;color:#239059;display:grid;place-items:center;margin:0 auto 20px}
+.confirmation h2{margin-bottom:16px}
+.confirmation p:not(.eyebrow){color:#687871;font-size:12px;margin-bottom:24px;line-height:1.6}
+
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+@keyframes pop-in{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+@media(max-width:560px){
+  .booking-modal{padding:26px 20px;border-radius:0;width:100%;height:100%;max-height:100vh}
+  .modal-backdrop{padding:0}
+}
+
+/* Razorpay implementation prompt: payment-stage panels (booking-modal, post
+   guest-form). Kept here per FILE_MAP.md rather than in the global stylesheet. */
+.booking-payment{display:grid;gap:14px;text-align:center}
+.booking-payment__header{font-size:9px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:#5c7180}
+.booking-payment__status{font-size:16px;font-weight:700;color:var(--navy);margin:0}
+.booking-payment__amount{font-size:22px;font-weight:700;color:var(--navy)}
+.booking-payment__message{color:#687871;font-size:12px;line-height:1.6;margin:0;display:flex;align-items:center;justify-content:center;gap:6px}
+.booking-payment__actions{display:grid;gap:10px;margin-top:4px}
+.booking-payment__retry{background:var(--navy)}
+.booking-payment__new-booking{background:#5c7180}
+.booking-payment__success{text-align:center}
+.booking-payment__failure{display:grid;gap:12px;text-align:center;padding:6px 0}
+.booking-payment__failure .booking-payment__message{color:#a64d37;font-weight:600}
+.booking-payment__pending{display:grid;gap:10px;justify-items:center;padding:30px 0}
+.booking-payment__spinner{display:inline-block;width:28px;height:28px;border-radius:50%;border:3px solid rgba(23,61,58,.15);border-top-color:var(--navy);animation:spin .8s linear infinite}
+
+.alternative-rooms {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+}
+
+.alternative-rooms h3 {
+  margin: 0 0 8px;
+}
+
+.alternative-room-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid #e5e7eb;
+}
+
+.alternative-room-card h4,
+.alternative-room-card p {
+  margin: 4px 0;
+}
+
+.alternative-rooms-loading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 12px 0;
+}
+
+@media (max-width: 480px) {
+  .alternative-room-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

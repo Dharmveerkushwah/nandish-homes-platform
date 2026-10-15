@@ -1,0 +1,137 @@
+/* Admin dashboard - shell (sidebar/header) now lives in admin-shell.component.css */
+
+.dashboard{padding-top:22px}
+
+/* Welcome / hero panel */
+.admin-page__head{
+  position:relative;
+  min-height:154px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:24px;
+  padding:26px 28px;
+  margin-bottom:18px;
+  overflow:hidden;
+  border:1px solid rgba(215,224,233,.9);
+  border-radius:10px;
+  background:
+    linear-gradient(90deg,
+      rgba(247,249,251,.98) 0%,
+      rgba(247,249,251,.94) 27%,
+      rgba(247,249,251,.72) 47%,
+      rgba(247,249,251,.18) 72%,
+      rgba(247,249,251,.04) 100%),
+    url('/assets/reference/admin-hadder.jpg') 74% center / cover no-repeat;
+  box-shadow:0 7px 22px rgba(31,65,95,.06);
+}
+
+.admin-page__head::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,rgba(255,255,255,.08),rgba(8,45,73,.03));
+  pointer-events:none;
+}
+
+.admin-page__head>div,
+.admin-page__time{position:relative;z-index:1}
+
+.admin-page__head>div{max-width:68%}
+.admin-page__kicker{margin:0 0 7px;color:#68829a;font-size:10px;font-weight:600;letter-spacing:.02em}
+.admin-page__head h1{margin:0;font:600 26px/1.2 var(--sans);color:#102f50;text-shadow:0 1px 0 rgba(255,255,255,.55)}
+.admin-page__head h1 strong{font-weight:700}
+.admin-page__head>div>p:last-child{margin:6px 0 0;color:#6f8497;font-size:12px}
+.admin-page__time{border-left:1px solid rgba(218,226,233,.95);padding-left:16px;font-size:10px;color:#4d6072;line-height:1.4;white-space:nowrap}
+.admin-page__time small{color:#8b98a5}
+
+.dashboard__stats{display:grid;grid-template-columns:repeat(6,minmax(120px,1fr));gap:10px;margin:18px 0}
+.stat-card{min-height:84px;padding:13px 10px;background:#fff;border:1px solid #e8edf2;border-radius:4px;display:flex;gap:9px;align-items:flex-start;box-shadow:0 3px 12px rgba(31,65,95,.04)}
+.stat-card>div{min-width:0}
+.stat-card>span:first-child{width:29px;height:29px;display:grid;place-items:center;border-radius:4px;font-size:14px}
+.stat-card span:not(.stat-icon){display:block;color:#65778a;font-size:9px;white-space:nowrap}
+.stat-card strong{display:block;margin:3px 0 1px;color:#122d50;font-size:20px;line-height:1.1}
+.stat-card small{display:block;color:#92a0ad;font-size:8px;white-space:nowrap}
+.stat-card .positive{color:#36a36d}
+.stat-card--blue .stat-icon{background:#e3f0fd;color:#317bc1}
+.stat-card--green .stat-icon{background:#e0f6e9;color:#3aa66d}
+.stat-card--gold .stat-icon{background:#fff1cf;color:#ce9220}
+.stat-card--purple .stat-icon{background:#efe4ff;color:#8050ba}
+.stat-card--red .stat-icon{background:#ffe3e2;color:#d35a5b}
+.stat-card--teal .stat-icon{background:#dff5f4;color:#259e9c}
+
+.dashboard__grid{display:grid;gap:12px}
+.dashboard__grid--primary{grid-template-columns:minmax(0,2.1fr) minmax(280px,1fr)}
+.dashboard__grid--secondary{grid-template-columns:1.12fr 1.35fr 1.12fr 1.35fr;margin-top:12px}
+.admin-card-head{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1px solid #edf0f3;padding-bottom:11px;margin-bottom:11px}
+.admin-card-head h2{margin:0;color:#1a3554;font-size:14px}
+.admin-card-head p{margin:3px 0 0;color:#8794a0;font-size:9px}
+
+.recent-card{min-height:100%}
+.recent-booking{display:grid;grid-template-columns:39px 1fr auto;gap:8px;align-items:center;padding:9px 0;border-bottom:1px solid #edf0f3}
+.recent-booking:last-child{border-bottom:0}
+.recent-booking__image{width:39px;height:36px;border-radius:3px;background:center/cover}
+.recent-booking strong,.recent-booking span,.recent-booking small{display:block}
+.recent-booking strong{font-size:10px;color:#274563}
+.recent-booking span{font-size:8px;color:#728597;margin-top:2px}
+.recent-booking small{font-size:8px;color:#9aa7b1;margin-top:2px}
+.admin-empty{color:#8a98a4;text-align:center;font-size:10px;padding:25px 7px}
+.admin-note{color:#8a97a3;font-size:9px;margin:10px 0 0;line-height:1.5}
+.admin-note code{background:#f2f5f8;padding:1px 4px;border-radius:3px}
+
+.insight-card{min-height:150px}
+.insight-card .admin-card-head{margin-bottom:8px}
+.donut{width:90px;height:90px;border-radius:50%;margin:10px auto 8px;display:grid;place-items:center}
+.donut>div{width:61px;height:61px;border-radius:50%;background:#fff;display:grid;place-items:center;align-content:center}
+.donut strong{font-size:16px;color:#1d446d;line-height:1}
+.donut span{font-size:7px;color:#8795a1}
+.source-row{display:flex;align-items:center;gap:5px;border-top:1px solid #eef1f4;padding-top:8px;color:#647a8c;font-size:8px}
+.source-dot{width:7px;height:7px;border-radius:50%}
+.source-row strong{margin-left:auto;color:#2d506d}
+.revenue-number{font-size:19px;font-weight:700;color:#1d4266;margin:14px 5px 2px}
+.revenue-sub{margin:0 5px 10px;color:#8a97a3;font-size:8.5px}
+.occupancy-row{display:grid;grid-template-columns:78px 1fr 28px;gap:6px;align-items:center;margin:14px 0;color:#667b8c;font-size:8px}
+.occupancy-track{height:8px;background:#e9eef3;border-radius:2px;overflow:hidden}
+.occupancy-track i{display:block;height:100%;background:#3677a6;border-radius:2px}
+.occupancy-row:nth-of-type(3) .occupancy-track i{background:#42b8b5}
+.occupancy-row:nth-of-type(4) .occupancy-track i{background:#f2a21d}
+.occupancy-row strong{text-align:right;color:#47647b;font-size:8px}
+.quick-actions{display:grid;grid-template-columns:repeat(2,1fr);gap:9px}
+.quick-actions a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:46px;background:#f8fafb;color:#496479;border:1px solid #edf1f4;border-radius:3px;font-size:8px}
+.quick-actions a span{font-size:15px;color:#2874a4}
+.dashboard__footer{padding:16px 0 14px;border-top:1px solid #e5ebf0;margin-top:17px;color:#8a98a5;font-size:8px;display:flex;justify-content:space-between}
+.dashboard__footer span{font-family:var(--serif);font-size:15px;font-style:italic;color:#6a8295}
+
+@media(max-width:1150px) {
+  .dashboard__stats{grid-template-columns:repeat(3,1fr)}
+  .dashboard__grid--secondary{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:800px) {
+  .admin-page__head{align-items:flex-start;gap:12px}
+  .admin-page__head h1{font-size:17px}
+  .admin-page__time{display:none}
+  .dashboard__stats{grid-template-columns:repeat(2,1fr);gap:7px}
+  .stat-card{padding:10px 7px}
+  .stat-card span:not(.stat-icon){font-size:8px}
+  .dashboard__grid--primary,.dashboard__grid--secondary{grid-template-columns:1fr}
+  .dashboard__footer{font-size:7px;flex-direction:column;gap:4px}
+}
+
+
+@media (max-width: 900px){
+  .admin-page__head{
+    min-height:145px;
+    padding:22px;
+    background:
+      linear-gradient(90deg,rgba(247,249,251,.98),rgba(247,249,251,.78)),
+      url('/assets/reference/admin-hadder.jpg') 72% center / cover no-repeat;
+  }
+  .admin-page__head>div{max-width:100%}
+  .admin-page__time{display:none}
+}
+
+@media (max-width: 600px){
+  .admin-page__head{min-height:130px;padding:20px 18px}
+  .admin-page__head h1{font-size:21px}
+  .admin-page__head>div>p:last-child{font-size:11px}
+}

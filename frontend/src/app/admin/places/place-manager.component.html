@@ -1,0 +1,52 @@
+<section class="admin-page">
+  <div class="admin-page__head">
+    <div><h1>Places</h1><p>Manage the "Explore Pondicherry" places shown on the public homepage.</p></div>
+    <div class="admin-page__actions"><button class="button button--solid button--sm" type="button" (click)="startAdd()"><nh-icon name="plus" [size]="13" />Add place</button></div>
+  </div>
+
+  @if (error()) { <nh-not-connected>{{ error() }}</nh-not-connected> }
+
+  @if (editing(); as edit) {
+    <div class="admin-card" style="margin:14px 0">
+      <div class="admin-card-head"><div><h2>{{ edit === 'new' ? 'New place' : 'Edit place' }}</h2></div></div>
+      <div class="admin-form">
+        <label>Name<input type="text" [ngModel]="draft().name" (ngModelChange)="updateDraft('name', $event)" /></label>
+        <label>Slug<input type="text" [ngModel]="draft().slug" (ngModelChange)="updateDraft('slug', $event)" /></label>
+        <label>Description<textarea rows="3" [ngModel]="draft().description" (ngModelChange)="updateDraft('description', $event)"></textarea></label>
+        <label>Image URL<input type="text" [ngModel]="draft().imageUrl" (ngModelChange)="updateDraft('imageUrl', $event)" /></label>
+        <label>Distance label<input type="text" placeholder="e.g. 10 min drive" [ngModel]="draft().distanceLabel" (ngModelChange)="updateDraft('distanceLabel', $event)" /></label>
+        <label>Category<input type="text" placeholder="e.g. Beach, Heritage, Café" [ngModel]="draft().category" (ngModelChange)="updateDraft('category', $event)" /></label>
+        <div class="admin-form__actions">
+          <button class="button button--ghost" type="button" (click)="cancelEdit()">Cancel</button>
+          <button class="button button--solid" type="button" [disabled]="saving() || !draft().name.trim()" (click)="save()">{{ saving() ? 'Saving…' : 'Save' }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading places…</span></div>
+  } @else if (!places().length) {
+    <div class="empty-state"><nh-icon name="map-pin" [size]="22" /><p>No places yet.</p></div>
+  } @else {
+    <div class="place-admin-list" style="margin-top:14px">
+      @for (place of places(); track place.id; let i = $index) {
+        <div class="place-admin-row">
+          <img [src]="place.imageUrl" [alt]="place.name" nhImgFallback="Place" class="place-admin-row__thumb" />
+          <div class="place-admin-row__body">
+            <strong>{{ place.name }}</strong>
+            <p>{{ place.category }} @if (place.distanceLabel) { &middot; {{ place.distanceLabel }} }</p>
+          </div>
+          <span class="badge" [class]="'badge--' + (place.active ? 'active' : 'inactive')">{{ place.active ? 'Active' : 'Inactive' }}</span>
+          <div class="row-actions">
+            <button class="icon-btn" type="button" (click)="move(place, -1)" [disabled]="i === 0" aria-label="Move up"><nh-icon name="chevron-left" [size]="14" /></button>
+            <button class="icon-btn" type="button" (click)="move(place, 1)" [disabled]="i === places().length - 1" aria-label="Move down"><nh-icon name="chevron-right" [size]="14" /></button>
+            <button class="icon-btn" type="button" (click)="startEdit(place)" aria-label="Edit place"><nh-icon name="edit" [size]="14" /></button>
+            <button class="icon-btn" type="button" (click)="toggleActive(place)" [attr.aria-label]="place.active ? 'Deactivate' : 'Activate'"><nh-icon [name]="place.active ? 'ban' : 'check'" [size]="14" /></button>
+            <button class="icon-btn icon-btn--danger" type="button" (click)="remove(place)" aria-label="Delete place"><nh-icon name="trash" [size]="14" /></button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

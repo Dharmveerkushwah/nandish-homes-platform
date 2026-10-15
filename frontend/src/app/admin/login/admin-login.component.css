@@ -1,0 +1,13 @@
+/* Admin login page styles */
+
+.admin-login{min-height:100vh;background:linear-gradient(135deg,#eef4f5,#f8f4ed);padding:28px 6%}
+.admin-login__card{width:min(100%,450px);margin:105px auto 0;background:#fff;border-radius:5px;padding:39px;box-shadow:0 11px 38px rgba(22,59,87,.12)}
+.admin-login h1{font-size:47px;color:var(--navy)}
+.admin-login form{display:grid;gap:15px}
+.admin-login label{font-size:9px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:#4d6879}
+.admin-login input{display:block;width:100%;border:1px solid #dbe5e8;border-radius:3px;padding:11px;margin-top:6px;background:#fff}
+
+@media(max-width:800px) {
+  .admin-login{padding:22px 6%}
+  .admin-login__card{margin-top:85px;padding:30px 23px}
+}

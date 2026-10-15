@@ -1,0 +1,62 @@
+<section class="admin-page">
+  <div class="admin-page__head">
+    <div>
+      <h1>Rooms &amp; villas</h1>
+      <p>Manage inventory, pricing, images and availability.</p>
+    </div>
+    <div class="admin-page__actions">
+      <button class="button button--solid button--sm" type="button" (click)="openAdd()"><nh-icon name="plus" [size]="13" />Add room</button>
+    </div>
+  </div>
+
+  @if (data.error()) {
+    <div class="error-state"><nh-icon name="alert" [size]="14" /><span>{{ data.error() }}</span></div>
+  }
+
+  <div class="admin-toolbar">
+    <div class="tab-pills">
+      <button type="button" class="tab-pill" [class.active]="filter() === 'all'" (click)="filter.set('all')">All</button>
+      @for (category of categories; track category.key) {
+        <button type="button" class="tab-pill" [class.active]="filter() === category.key" (click)="filter.set(category.key)">{{ category.label }}</button>
+      }
+    </div>
+    <div class="admin-search">
+      <nh-icon name="search" [size]="14" />
+      <input type="search" placeholder="Search rooms…" [ngModel]="search()" (ngModelChange)="search.set($event)" />
+    </div>
+  </div>
+
+  @if (data.loading()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading rooms…</span></div>
+  } @else if (!filtered().length) {
+    <div class="empty-state"><nh-icon name="building" [size]="22" /><p>No rooms match this filter.</p></div>
+  } @else {
+    <div class="room-admin-grid">
+      @for (room of filtered(); track room.id) {
+        <article class="room-admin-card">
+          <div class="room-admin-card__image">
+            <img [src]="room.imageUrl" [alt]="room.name" loading="lazy" nhImgFallback="Room photo" />
+            <span class="badge" [class]="'badge--' + ((room.active ?? true) ? 'active' : 'inactive')">{{ (room.active ?? true) ? 'Active' : 'Inactive' }}</span>
+          </div>
+          <div class="room-admin-card__body">
+            <p class="room-admin-card__category">{{ categoryLabel(room) }}</p>
+            <h3>{{ room.name }}</h3>
+            <p class="room-admin-card__meta">{{ room.maxGuests }} guests · {{ room.sizeSqft }} sqft</p>
+            <p class="room-admin-card__price">{{ room.pricePerNight | currency:'INR':'symbol-narrow':'1.0-0' }}<small>/ night</small></p>
+          </div>
+          <div class="room-admin-card__actions">
+            <button class="icon-btn" type="button" (click)="openEdit(room)" aria-label="Edit room"><nh-icon name="edit" [size]="15" /></button>
+            <button class="icon-btn" type="button" (click)="toggleActive(room)" [attr.aria-label]="(room.active ?? true) ? 'Deactivate' : 'Activate'">
+              <nh-icon [name]="(room.active ?? true) ? 'ban' : 'check'" [size]="15" />
+            </button>
+            <button class="icon-btn icon-btn--danger" type="button" (click)="deleteRoom(room)" [disabled]="deletingId() === room.id" aria-label="Delete room"><nh-icon name="trash" [size]="15" /></button>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>
+
+@if (modalRoom(); as modal) {
+  <nh-room-form-modal [room]="modal === 'new' ? null : modal" (saved)="onSaved()" (closed)="closeModal()" />
+}

@@ -1,0 +1,18 @@
+<main class="page-shell page-shell--narrow legal-page">
+  <a class="back-link" routerLink="/"><nh-icon name="chevron-left" [size]="12" /> Back home</a>
+
+  <div class="page-intro">
+    <p class="eyebrow">Legal</p>
+    <h1>{{ content().title }}</h1>
+    <p>{{ content().intro }}</p>
+  </div>
+
+  <div class="legal-sections">
+    @for (section of content().sections; track section.heading) {
+      <section>
+        <h2>{{ section.heading }}</h2>
+        <p>{{ section.body }}</p>
+      </section>
+    }
+  </div>
+</main>

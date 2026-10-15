@@ -1,0 +1,100 @@
+<main class="admin-login">
+
+  <!-- Brand -->
+  <a class="brand brand--dark" href="/">
+    NANDISH <span>HOMES</span>
+  </a>
+  
+
+  <!-- Login Card -->
+  <section class="admin-login__card">
+
+    <p class="eyebrow">Property console</p>
+
+    <h1>Welcome back.</h1>
+
+    <p>
+      Sign in to manage arrivals, rooms and the rhythm of the house.
+    </p>
+
+    <!-- Login Form -->
+    <form
+      #loginForm="ngForm"
+      (ngSubmit)="signIn()"
+      novalidate
+    >
+
+      <!-- Email -->
+      <label for="email">
+        Email address
+
+        <input
+          id="email"
+          type="email"
+          name="email"
+          [(ngModel)]="email"
+          #emailModel="ngModel"
+          required
+          autocomplete="username"
+          placeholder="you@nandishhomes.com"
+        />
+      </label>
+
+      @if (emailModel.invalid && emailModel.touched) {
+        <p class="form-note form-note--error">
+          Please enter a valid email address.
+        </p>
+      }
+
+      <!-- Password -->
+      <label for="password">
+        Password
+
+        <input
+          id="password"
+          type="password"
+          name="password"
+          [(ngModel)]="password"
+          #passwordModel="ngModel"
+          required
+          minlength="4"
+          autocomplete="current-password"
+          placeholder="••••••••"
+        />
+      </label>
+
+      @if (passwordModel.invalid && passwordModel.touched) {
+        <p class="form-note form-note--error">
+          Please enter your password.
+        </p>
+      }
+
+      <!-- Backend Error -->
+      @if (error) {
+        <p class="form-note form-note--error">
+          {{ error }}
+        </p>
+      }
+
+      <!-- Submit -->
+      <button
+        class="button button--solid"
+        type="submit"
+        [disabled]="submitted || loginForm.invalid"
+      >
+        {{ submitted ? 'Signing in…' : 'Sign in' }}
+        <span>→</span>
+      </button>
+
+    </form>
+
+    <!-- Local Development Hint -->
+    <p class="login-hint">
+      Local development:
+      <strong>admin@nandishhomes.com</strong>
+      · password
+    </p>
+
+  </section>
+
+</main>

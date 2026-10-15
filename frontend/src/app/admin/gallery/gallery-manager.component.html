@@ -1,0 +1,57 @@
+<section class="admin-page">
+  <div class="admin-page__head">
+    <div>
+      <h1>Gallery management</h1>
+      <p>Curate the photos shown on the public gallery and homepage.</p>
+    </div>
+  </div>
+
+  @if (error()) {
+    <nh-not-connected>{{ error() }} You can still try adding an image below once the backend is ready.</nh-not-connected>
+  }
+
+  <div class="admin-card" style="margin:14px 0">
+    <div class="admin-card-head"><div><h2>Add image</h2><p>By URL — a real upload endpoint isn't in the current API yet</p></div></div>
+    <div class="admin-form">
+      <div class="admin-form__row">
+        <label>Image URL<input type="text" [ngModel]="newUrl()" (ngModelChange)="newUrl.set($event)" placeholder="https://…" /></label>
+        <label>Category<select [ngModel]="newCategory()" (ngModelChange)="newCategory.set($event)">@for (c of categories; track c) { <option [value]="c">{{ c }}</option> }</select></label>
+      </div>
+      <label>Caption (optional)<input type="text" [ngModel]="newCaption()" (ngModelChange)="newCaption.set($event)" /></label>
+      <div class="admin-form__actions" style="justify-content:flex-start">
+        <button class="button button--solid button--sm" type="button" [disabled]="adding() || !newUrl().trim()" (click)="addImage()">{{ adding() ? 'Adding…' : 'Add image' }}</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-pills" style="margin-bottom:14px">
+    <button type="button" class="tab-pill" [class.active]="filter() === 'all'" (click)="filter.set('all')">All</button>
+    @for (c of categories; track c) { <button type="button" class="tab-pill" [class.active]="filter() === c" (click)="filter.set(c)">{{ c }}</button> }
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading gallery…</span></div>
+  } @else if (!filtered().length) {
+    <div class="empty-state"><nh-icon name="image" [size]="22" /><p>No images in this category yet.</p></div>
+  } @else {
+    <div class="gallery-admin-grid">
+      @for (image of filtered(); track image.id) {
+        <article class="gallery-admin-card">
+          <div class="gallery-admin-card__image">
+            <img [src]="image.url" [alt]="image.caption ?? ''" loading="lazy" nhImgFallback="Gallery photo" />
+            @if (!(image.active ?? true)) { <span class="badge badge--inactive">Inactive</span> }
+          </div>
+          <div class="gallery-admin-card__body">
+            <p class="gallery-admin-card__category">{{ image.category }}</p>
+            @if (image.caption) { <p class="gallery-admin-card__caption">{{ image.caption }}</p> }
+            <label class="checkbox-row"><input type="checkbox" [checked]="image.showOnHomepage" (change)="toggleHomepage(image)" />Show on homepage</label>
+          </div>
+          <div class="room-admin-card__actions">
+            <button class="icon-btn" type="button" (click)="toggleActive(image)" [attr.aria-label]="(image.active ?? true) ? 'Deactivate' : 'Activate'"><nh-icon [name]="(image.active ?? true) ? 'ban' : 'check'" [size]="15" /></button>
+            <button class="icon-btn icon-btn--danger" type="button" (click)="remove(image)" aria-label="Delete image"><nh-icon name="trash" [size]="15" /></button>
+          </div>
+        </article>
+      }
+    </div>
+  }
+</section>

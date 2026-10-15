@@ -1,0 +1,62 @@
+<section class="admin-page">
+  <div class="admin-page__head">
+    <div><h1>Offers &amp; packages</h1><p>Seasonal discounts and packages shown to guests.</p></div>
+    <div class="admin-page__actions"><button class="button button--solid button--sm" type="button" (click)="startAdd()"><nh-icon name="plus" [size]="13" />New offer</button></div>
+  </div>
+
+  @if (error()) { <nh-not-connected>{{ error() }}</nh-not-connected> }
+
+  @if (editing()) {
+    <div class="admin-card" style="margin:14px 0">
+      <div class="admin-card-head"><div><h2>{{ editing() === 'new' ? 'New offer' : 'Edit offer' }}</h2></div></div>
+      <div class="admin-form">
+        <div class="admin-form__row">
+          <label>Coupon code<input type="text" [(ngModel)]="draft.code" placeholder="SUMMER25" style="text-transform:uppercase" /></label>
+          <label>Title<input type="text" [(ngModel)]="draft.title" /></label>
+        </div>
+        <label>Description<textarea rows="2" [(ngModel)]="draft.description"></textarea></label>
+        <div class="admin-form__row">
+          <label>Discount (%)<input type="number" min="0" max="100" [(ngModel)]="draft.discountPercent" /></label>
+          <label>Applicable room type<select [(ngModel)]="draft.roomTypeId"><option [ngValue]="null">All room types</option>@for (rt of roomTypes(); track rt.id) { <option [ngValue]="rt.id">{{ rt.name }}</option> }</select></label>
+        </div>
+        <div class="admin-form__row">
+          <label>Valid from<input type="date" [(ngModel)]="draft.validFrom" /></label>
+          <label>Valid to<input type="date" [(ngModel)]="draft.validTo" /></label>
+        </div>
+        <div class="admin-form__actions">
+          <button class="button button--ghost" type="button" (click)="cancelEdit()">Cancel</button>
+          <button class="button button--solid" type="button" [disabled]="saving() || !draft.code.trim() || !draft.title.trim()" (click)="save()">{{ saving() ? 'Saving…' : 'Save' }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading offers…</span></div>
+  } @else if (!offers().length) {
+    <div class="empty-state"><nh-icon name="tag" [size]="22" /><p>No offers yet.</p></div>
+  } @else {
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>Code</th><th>Offer</th><th>Discount</th><th>Applies to</th><th>Valid</th><th>Status</th><th></th></tr></thead>
+        <tbody>
+          @for (offer of offers(); track offer.id) {
+            <tr>
+              <td><code>{{ offer.code }}</code></td>
+              <td><strong>{{ offer.title }}</strong></td>
+              <td>{{ offer.discountPercent }}%</td>
+              <td>{{ applicableLabel(offer) }}</td>
+              <td>{{ offer.validFrom | date:'d MMM' }} – {{ offer.validTo | date:'d MMM yyyy' }}</td>
+              <td><span class="badge" [class]="'badge--' + ((offer.active ?? true) ? 'active' : 'inactive')">{{ (offer.active ?? true) ? 'Active' : 'Inactive' }}</span></td>
+              <td class="row-actions">
+                <button class="icon-btn" type="button" (click)="startEdit(offer)" aria-label="Edit offer"><nh-icon name="edit" [size]="14" /></button>
+                <button class="icon-btn" type="button" (click)="toggleActive(offer)" [attr.aria-label]="(offer.active ?? true) ? 'Deactivate' : 'Activate'"><nh-icon [name]="(offer.active ?? true) ? 'ban' : 'check'" [size]="14" /></button>
+                <button class="icon-btn icon-btn--danger" type="button" (click)="remove(offer)" aria-label="Delete offer"><nh-icon name="trash" [size]="14" /></button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

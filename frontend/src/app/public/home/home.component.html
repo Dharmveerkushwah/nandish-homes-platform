@@ -1,0 +1,220 @@
+<main>
+  <section class="hero" [style.background-image]="'linear-gradient(90deg, rgba(5,37,57,.82), rgba(5,37,57,.25)), url(' + heroImage + ')'">
+    <div class="hero__content">
+      <p class="eyebrow eyebrow--light">Nandish Homes</p>
+      <h1>Stay in Serenity.<br /><em>Experience Pondicherry.</em></h1>
+      <p class="hero__copy">Luxury Villas | Pool Rooms | Holiday Stays</p>
+      <div class="hero__facts">
+        @if (!roomsLoading()) {
+          <span><nh-icon name="villa" [size]="17" /><b>{{ categoryCards()[0].count }} Villas</b></span>
+          <span><nh-icon name="pool" [size]="17" /><b>{{ categoryCards()[1].count }} Pool Rooms</b></span>
+          <span><nh-icon name="bed" [size]="17" /><b>{{ categoryCards()[2].count }} Non-Pool Rooms</b></span>
+        }
+        <span><nh-icon name="family" [size]="17" /><b>Perfect for Families</b></span>
+      </div>
+    </div>
+    <div class="hero__script">More than a stay<br /><em>A feeling.</em></div>
+  </section>
+
+  <section class="booking-strip" id="book">
+    <form (ngSubmit)="searchAvailability()" class="booking-form" novalidate>
+      <label>
+        <span><nh-icon name="calendar" [size]="12" /> Check in</span>
+        <input
+          type="date"
+          name="checkIn"
+          [min]="today"
+          [ngModel]="search.checkIn"
+          (ngModelChange)="onCheckInChange($event)"
+          required
+        />
+      </label>
+      <label>
+        <span><nh-icon name="calendar" [size]="12" /> Check out</span>
+        <input type="date" name="checkOut" [min]="search.checkIn || today" [(ngModel)]="search.checkOut" required />
+      </label>
+      <label>
+        <span><nh-icon name="users" [size]="12" /> Guests</span>
+        <select name="guests" [(ngModel)]="search.guests">
+          <option [ngValue]="1">1 Guest</option>
+          <option [ngValue]="2">2 Guests</option>
+          <option [ngValue]="3">3 Guests</option>
+          <option [ngValue]="4">4 Guests</option>
+          <option [ngValue]="5">5+ Guests</option>
+        </select>
+      </label>
+      <button class="button button--solid" type="submit" [disabled]="searching()">
+        @if (searching()) { <span class="spinner-dark" aria-hidden="true"></span> Checking&hellip; }
+        @else { Check availability <span>&rarr;</span> }
+      </button>
+    </form>
+    @if (searchError()) {
+      <p class="booking-error"><nh-icon name="alert" [size]="13" /> {{ searchError() }}</p>
+    }
+  </section>
+
+  <section class="feature-strip">
+    @for (feature of features; track feature.label) {
+      <div>
+        <nh-icon [name]="feature.icon" [size]="26" />
+        <div><b>{{ feature.label }}</b><small>{{ feature.sub }}</small></div>
+      </div>
+    }
+  </section>
+
+  @if (searching() || searched()) {
+    <section class="search-results" id="results">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Your dates</p>
+          <h2>Available <em>stays.</em></h2>
+        </div>
+        <p>{{ search.checkIn | date:'d MMM' }} &mdash; {{ search.checkOut | date:'d MMM yyyy' }} &middot; {{ search.guests }} guests</p>
+      </div>
+      @if (searching()) {
+        <div class="loading-state"><span class="spinner-navy" aria-hidden="true"></span> Checking availability&hellip;</div>
+      } @else if (availableRooms().length) {
+        <div class="room-grid room-grid--results">
+          @for (room of availableRooms(); track room.id) {
+            <nh-room-card [room]="room" (select)="openBooking($event)" />
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <nh-icon name="search" [size]="22" />
+          <p>Nothing is open for these dates. Try shifting your stay by a day, or browse every room.</p>
+          <a class="outline-button" routerLink="/rooms">Browse all rooms &rarr;</a>
+        </div>
+      }
+    </section>
+  }
+
+  <section class="accommodation-section" id="stay">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">Our accommodation</p>
+        <h2>Choose your perfect stay<br /><em>from our villas and rooms.</em></h2>
+      </div>
+      <a class="outline-button" routerLink="/rooms">View all &rarr;</a>
+    </div>
+
+    @if (roomsLoading()) {
+      <div class="loading-state"><span class="spinner-navy" aria-hidden="true"></span> Loading accommodation&hellip;</div>
+    } @else if (roomsError()) {
+      <div class="empty-state"><nh-icon name="alert" [size]="22" /><p>We couldn’t load room details right now. Please refresh, or reach us on WhatsApp.</p></div>
+    } @else {
+      <div class="category-grid">
+        @for (card of categoryCards(); track card.meta.key) {
+          <article class="category-card">
+            <div class="category-card__image">
+              <img [src]="card.meta.image" [alt]="card.meta.label" loading="lazy" [nhImgFallback]="card.meta.label" />
+              <span class="category-card__badge">{{ card.count }} {{ card.count === 1 ? card.meta.singular : card.meta.label }}</span>
+            </div>
+            <div class="category-card__body">
+              <h3>{{ card.meta.label }}</h3>
+              <p>{{ card.meta.description }}</p>
+              <div class="category-card__stats">
+                <span><nh-icon name="users" [size]="14" /> Up to {{ card.maxGuests }} guests</span>
+                <span><nh-icon name="check" [size]="14" /> {{ card.meta.amenities[0] }}</span>
+              </div>
+              <button class="button button--solid button--wide" type="button" (click)="viewCategory(card.meta.key)">
+                View {{ card.meta.label }} <span>&rarr;</span>
+              </button>
+            </div>
+          </article>
+        }
+      </div>
+
+      @if (featuredRooms().length) {
+        <div class="featured-rooms">
+          <p class="eyebrow">Guest favourites</p>
+          <div class="room-grid">
+            @for (room of featuredRooms(); track room.id) {
+              <nh-room-card [room]="room" (select)="openBooking($event)" />
+            }
+          </div>
+        </div>
+      }
+    }
+  </section>
+
+  <section class="explore-section" id="pondicherry">
+    <div class="explore-copy">
+      <p class="eyebrow">Explore Pondicherry</p>
+      <h2>A destination<br /><em>that stays with you.</em></h2>
+      <p>From serene beaches to charming caf&eacute;s, Pondicherry offers the perfect blend of relaxation, culture and unforgettable experiences.</p>
+      <div class="explore-places">
+        @for (place of explorePlaces(); track place.name) {
+          <div class="explore-place">
+            <img [src]="place.image" [alt]="place.name" loading="lazy" [nhImgFallback]="place.name" />
+            <span>{{ place.name }}</span>
+          </div>
+        }
+      </div>
+      <a class="button button--solid" routerLink="/about">Discover Pondicherry <span>&rarr;</span></a>
+    </div>
+    <div class="explore-image">
+      <img [src]="exploreCtaImage" alt="Beach sunset near Pondicherry" loading="lazy" nhImgFallback="Pondicherry" />
+    </div>
+  </section>
+
+  <section class="gallery-reviews" id="gallery">
+    <div class="gallery-panel">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Gallery</p>
+          <h2>Take a visual tour<br /><em>of Nandish Homes.</em></h2>
+        </div>
+        <a class="outline-button" routerLink="/gallery">View full gallery &rarr;</a>
+      </div>
+      @if (galleryPreview().length) {
+        <div class="gallery-grid">
+          @for (image of galleryPreview(); track image.url) {
+            <img [src]="image.url" [alt]="image.alt" loading="lazy" nhImgFallback="Gallery photo" class="gallery-image" />
+          }
+        </div>
+      } @else {
+        <div class="empty-state"><nh-icon name="image-off" [size]="22" /><p>Gallery photos coming soon.</p></div>
+      }
+    </div>
+    <div class="review-panel" id="reviews">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Guest reviews</p>
+          <h2>Loved by<br /><em>our guests.</em></h2>
+        </div>
+        <a class="outline-button" routerLink="/reviews">View all reviews &rarr;</a>
+      </div>
+      @if (currentReview(); as review) {
+        <span class="review-stars">
+          @for (star of fiveStars; track star) {
+            <nh-icon name="star" [size]="13" [style.opacity]="star <= review.rating ? 1 : 0.25" />
+          }
+        </span>
+        <blockquote>&ldquo;{{ review.text }}&rdquo;</blockquote>
+        <p class="review-author">{{ review.name }} <small>{{ review.date | date:'d MMM yyyy' }}</small></p>
+        <div class="review-controls">
+          <button type="button" (click)="prevReview()" aria-label="Previous review"><nh-icon name="chevron-left" [size]="16" /></button>
+          <div class="review-dots">
+            @for (review of reviews(); track review.name; let i = $index) {
+              <span [class.active]="i === reviewIndex()"></span>
+            }
+          </div>
+          <button type="button" (click)="nextReview()" aria-label="Next review"><nh-icon name="chevron-right" [size]="16" /></button>
+        </div>
+      } @else {
+        <div class="empty-state"><nh-icon name="alert" [size]="22" /><p>Guest reviews coming soon.</p></div>
+      }
+    </div>
+  </section>
+
+  <section class="quote-section" [style.background-image]="'linear-gradient(90deg, rgba(11,58,83,.5), rgba(11,58,83,.15)), url(' + quoteImage + ')'">
+    <h2>Your Pondicherry escape starts here.</h2>
+    <p>Relax. Rejuvenate. Stay in Serenity.</p>
+    <div class="quote-actions">
+      <a class="button button--light" href="#book" (click)="$event.preventDefault(); scrollToBook()">Check availability <span>&rarr;</span></a>
+      <a class="button button--solid" routerLink="/rooms">Book now <span>&rarr;</span></a>
+      <a class="button button--whatsapp" href="https://wa.me/919862986851" target="_blank" rel="noopener"><nh-icon name="whatsapp" [size]="15" /> Chat on WhatsApp</a>
+    </div>
+  </section>
+</main>

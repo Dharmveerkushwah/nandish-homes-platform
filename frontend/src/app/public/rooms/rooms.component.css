@@ -1,0 +1,16 @@
+/* Rooms listing page styles */
+
+.filter-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px}
+.filter-tabs button{
+  border:1px solid var(--line);background:#fff;color:#4e6879;padding:9px 18px;
+  border-radius:20px;font-size:11px;font-weight:600;transition:background .15s,border-color .15s,color .15s;
+}
+.filter-tabs button:hover{border-color:var(--gold)}
+.filter-tabs button.active{background:var(--navy);border-color:var(--navy);color:#fff}
+
+.empty-state p,.loading-state p{margin:0}
+
+@media(max-width:600px){
+  .filter-tabs{gap:6px}
+  .filter-tabs button{padding:8px 14px;font-size:10px}
+}

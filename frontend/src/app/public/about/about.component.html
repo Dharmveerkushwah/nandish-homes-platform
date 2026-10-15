@@ -1,0 +1,42 @@
+<section class="about-hero" [style.background-image]="'linear-gradient(90deg, rgba(5,37,57,.72), rgba(5,37,57,.3)), url(' + content.heroImage + ')'">
+  <p class="eyebrow eyebrow--light">About us</p>
+  <h1>The story of<br /><em>Nandish Homes.</em></h1>
+</section>
+
+<main class="page-shell page-shell--narrow about-body">
+  <div class="about-story">
+    @for (paragraph of content.story; track paragraph) {
+      <p>{{ paragraph }}</p>
+    }
+  </div>
+
+  <div class="about-images">
+    @for (image of content.images; track image) {
+      <img [src]="image" alt="Nandish Homes property" loading="lazy" nhImgFallback="Nandish Homes" />
+    }
+  </div>
+
+  <div class="about-columns">
+    <div class="about-amenities">
+      <p class="eyebrow">Amenities</p>
+      <div class="amenity-grid">
+        @for (amenity of content.amenities; track amenity) {
+          <span><nh-icon name="check" [size]="13" /> {{ amenity }}</span>
+        }
+      </div>
+    </div>
+
+    <div class="about-location">
+      <p class="eyebrow">Location</p>
+      <p class="about-location__line"><nh-icon name="map-pin" [size]="16" /> {{ content.location.line1 }}</p>
+      <p class="about-location__sub">{{ content.location.line2 }}</p>
+      <p class="about-location__note">{{ content.location.note }}</p>
+      <a class="outline-button" routerLink="/contact">Get in touch <span>&rarr;</span></a>
+    </div>
+  </div>
+
+  <div class="about-cta">
+    <a class="button button--solid" routerLink="/rooms">View rooms &amp; villas <span>&rarr;</span></a>
+    <a class="button button--whatsapp" href="https://wa.me/919862986851" target="_blank" rel="noopener"><nh-icon name="whatsapp" [size]="15" /> Chat on WhatsApp</a>
+  </div>
+</main>

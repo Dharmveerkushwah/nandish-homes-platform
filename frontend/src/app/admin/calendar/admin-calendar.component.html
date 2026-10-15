@@ -1,0 +1,19 @@
+<section class="admin-page">
+  <div class="admin-page__head">
+    <div>
+      <h1>Property calendar</h1>
+      <p>Room-wise availability, check-ins and check-outs. Click a date to open its booking.</p>
+    </div>
+  </div>
+
+  <div class="tab-pills" style="margin-bottom:14px">
+    <button type="button" class="tab-pill" [class.active]="filter() === 'all'" (click)="setFilter('all')">All rooms</button>
+    @for (category of categories; track category.key) {
+      <button type="button" class="tab-pill" [class.active]="filter() === category.key" (click)="setFilter(category.key)">{{ category.label }}</button>
+    }
+  </div>
+
+  <div class="admin-card">
+    <nh-property-calendar [rangeDays]="21" [categoryFilter]="filter()" (cellClick)="onCellClick($event)" />
+  </div>
+</section>

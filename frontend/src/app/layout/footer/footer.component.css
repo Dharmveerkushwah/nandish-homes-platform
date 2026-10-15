@@ -1,0 +1,35 @@
+.site-footer{background:#fff;color:#496274;padding:44px 6% 0;border-top:1px solid #e8eded}
+.footer-grid{max-width:1280px;margin:auto;display:grid;grid-template-columns:1.4fr 1fr 1fr 1.2fr 1.3fr;gap:34px;padding-bottom:36px}
+.footer-brand .brand{display:inline-flex;align-items:center;gap:9px;margin-bottom:14px}
+.footer-brand .brand-name{font-family:var(--serif);font-weight:700;font-size:15px;color:var(--navy)}
+.footer-brand .brand-tag{font-family:var(--serif);font-style:italic;font-size:10px;color:var(--gold)}
+.footer-brand p{color:#71828a;font-size:11.5px;line-height:1.7;max-width:280px;margin:0 0 18px}
+.social-row{display:flex;gap:10px}
+.social-row a{width:32px;height:32px;border-radius:50%;background:#eef3f4;display:grid;place-items:center;color:#426176;transition:background .15s,color .15s}
+.social-row a:hover{background:var(--gold);color:#fff}
+
+.footer-col{display:flex;flex-direction:column;gap:9px;font-size:11.5px}
+.footer-col .eyebrow{color:#8e9da1;margin-bottom:2px}
+.footer-col a{color:#496274}
+.footer-col a:hover{color:var(--gold)}
+.footer-col--contact a{display:flex;align-items:flex-start;gap:8px;line-height:1.4}
+.whatsapp-chip{display:inline-flex!important;align-items:center;gap:7px;background:#1eaf67;color:#fff!important;border-radius:20px;padding:7px 13px;font-weight:600;width:fit-content;margin-top:4px}
+.whatsapp-chip:hover{background:#189257}
+
+.footer-map{display:flex;flex-direction:column;gap:10px}
+.footer-map iframe{width:100%;height:120px;border:0;border-radius:8px;filter:grayscale(.15) contrast(1.05)}
+.footer-map .button{justify-content:center;gap:8px;font-size:10px}
+
+.footer-bottom{max-width:1280px;margin:auto;border-top:1px solid rgba(255,255,255,.12);padding:16px 0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;color:#8aa0ac;font-size:9.5px}
+.footer-script{font-family:var(--serif);font-style:italic;color:#b8c9d1}
+.footer-legal a{color:#8aa0ac}
+.footer-legal a:hover{color:var(--gold)}
+
+@media(max-width:1080px){
+  .footer-grid{grid-template-columns:1fr 1fr;row-gap:30px}
+}
+@media(max-width:600px){
+  .site-footer{padding:44px 7% 0}
+  .footer-grid{grid-template-columns:1fr;gap:26px}
+  .footer-bottom{flex-direction:column;align-items:flex-start;text-align:left}
+}

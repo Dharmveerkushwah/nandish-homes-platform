@@ -1,0 +1,28 @@
+.contact-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:36px;align-items:start}
+
+.contact-info{display:grid;gap:10px}
+.contact-info__row{display:flex;align-items:center;gap:14px;background:#fff;border-radius:8px;padding:14px 16px;box-shadow:0 2px 10px rgba(17,56,78,.05);transition:box-shadow .15s,transform .15s}
+.contact-info__row:hover{box-shadow:0 8px 20px rgba(17,56,78,.1);transform:translateY(-1px)}
+.contact-info__icon{width:38px;height:38px;border-radius:50%;background:#eef3f4;color:var(--navy);display:grid;place-items:center;flex:none}
+.contact-info__row strong{display:block;font-size:12.5px;color:var(--navy)}
+.contact-info__row small{color:#8a99a2;font-size:10.5px}
+.contact-info__row--whatsapp .contact-info__icon{background:#dff2e6;color:#1eaf67}
+
+.contact-map{margin-top:6px;display:grid;gap:10px}
+.contact-map iframe{width:100%;height:220px;border:0;border-radius:10px}
+.contact-map .outline-button{justify-content:center}
+
+.contact-form{background:#fff;border-radius:10px;padding:26px;box-shadow:0 4px 18px rgba(17,56,78,.07);display:grid;gap:13px}
+.contact-form label{font-size:9px;letter-spacing:.07em;text-transform:uppercase;font-weight:700;color:#5c7180}
+.contact-form label small{text-transform:none;font-weight:400;letter-spacing:0;color:#9aa8ae}
+.contact-form input,.contact-form textarea{display:block;width:100%;border:1px solid #dce5e7;border-radius:5px;margin-top:5px;padding:10px 11px;font-size:13px;color:var(--ink);resize:vertical;outline-color:var(--gold)}
+.contact-form input.input-error,.contact-form textarea.input-error{border-color:#c2543f}
+.field-error{display:flex;align-items:center;gap:5px;margin-top:5px;color:#b24c3b;font-size:10px;font-weight:600;text-transform:none;letter-spacing:0}
+.form-status{display:flex;align-items:flex-start;gap:7px;font-size:11.5px;line-height:1.6;margin:0;padding:10px 12px;border-radius:6px}
+.form-status--ok{background:#eaf7ef;color:#1f8a54}
+.form-status--info{background:#fdf6e8;color:#8a6a1f}
+.form-status--info a{text-decoration:underline}
+
+@media(max-width:860px){
+  .contact-grid{grid-template-columns:1fr}
+}

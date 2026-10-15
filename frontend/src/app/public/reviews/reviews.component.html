@@ -1,0 +1,52 @@
+<main class="page-shell page-shell--narrow" id="reviews-top">
+  <a class="back-link" routerLink="/"><nh-icon name="chevron-left" [size]="12" /> Back home</a>
+
+  <div class="page-intro">
+    <p class="eyebrow">Guest reviews</p>
+    <h1>Loved by<br /><em>our guests.</em></h1>
+    @if (!loading() && !error() && reviews().length) {
+      <p class="rating-summary">
+        <span class="rating-summary__stars">
+          @for (star of stars(5); track $index) { <nh-icon name="star" [size]="14" /> }
+        </span>
+        {{ averageRating() }} average from {{ reviews().length }} reviews
+      </p>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner-navy" aria-hidden="true"></span> Loading reviews&hellip;</div>
+  } @else if (error()) {
+    <div class="empty-state"><nh-icon name="alert" [size]="22" /><p>We couldn't load reviews right now. Please refresh or reach us on WhatsApp.</p></div>
+  } @else if (!reviews().length) {
+    <div class="empty-state"><nh-icon name="alert" [size]="22" /><p>No reviews to show yet &mdash; check back soon.</p></div>
+  } @else {
+    <div class="review-list">
+      @for (review of pagedReviews(); track review.name + review.date) {
+        <article class="review-card">
+          <div class="review-card__head">
+            <div class="review-card__avatar">{{ review.name.charAt(0) }}</div>
+            <div>
+              <p class="review-card__name">{{ review.name }}</p>
+              <span class="review-card__stars">
+                @for (filled of stars(review.rating); track $index) {
+                  <nh-icon name="star" [size]="12" [style.opacity]="filled ? 1 : 0.25" />
+                }
+              </span>
+            </div>
+            <span class="review-card__date">{{ review.date | date:'d MMM yyyy' }}</span>
+          </div>
+          <p class="review-card__text">&ldquo;{{ review.text }}&rdquo;</p>
+        </article>
+      }
+    </div>
+
+    @if (pages().length > 1) {
+      <nav class="pagination" aria-label="Reviews pagination">
+        @for (p of pages(); track p) {
+          <button type="button" [class.active]="p === page()" (click)="goToPage(p)">{{ p + 1 }}</button>
+        }
+      </nav>
+    }
+  }
+</main>

@@ -1,0 +1,8 @@
+:host{display:block}
+.line-chart{width:100%;height:110px;overflow:visible}
+.line-chart__area{fill:rgba(196,155,62,.16);stroke:none}
+.line-chart__line{fill:none;stroke:var(--gold, #c49b3e);stroke-width:2}
+.line-chart__dot{fill:#fff;stroke:var(--gold, #c49b3e);stroke-width:2;cursor:pointer}
+.line-chart__dot:hover{fill:var(--gold, #c49b3e)}
+.line-chart__axis{display:flex;justify-content:space-between;margin-top:6px;color:#96a3ae;font-size:8px}
+.line-chart__empty{color:#8a97a3;font-size:10.5px;text-align:center;padding:30px 0}

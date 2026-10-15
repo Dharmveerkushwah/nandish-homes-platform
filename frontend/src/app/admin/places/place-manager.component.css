@@ -1,0 +1,7 @@
+:host{display:block}
+.place-admin-list{display:flex;flex-direction:column;gap:10px}
+.place-admin-row{display:flex;align-items:center;gap:12px;border:1px solid #edf1f4;border-radius:6px;padding:10px 12px}
+.place-admin-row__thumb{width:52px;height:52px;border-radius:6px;object-fit:cover;flex-shrink:0;background:#eef2f5}
+.place-admin-row__body{flex:1;min-width:0}
+.place-admin-row__body strong{display:block;color:#1a3554;font-size:12px;margin-bottom:2px}
+.place-admin-row__body p{margin:0;color:#5c7186;font-size:11px}

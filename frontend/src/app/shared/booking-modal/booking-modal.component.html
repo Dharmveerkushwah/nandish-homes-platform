@@ -1,0 +1,231 @@
+@if (flow.selectedRoom(); as room) {
+  <div class="modal-backdrop" (click)="close()" role="presentation">
+    <section
+      class="booking-modal"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-label]="'Book ' + room.name"
+      (click)="$event.stopPropagation()"
+    >
+      <button class="modal-close" type="button" (click)="close()" aria-label="Close booking dialog">
+        <nh-icon name="close" [size]="18" />
+      </button>
+
+      @if (payment.state() === 'IDLE') {
+        <p class="eyebrow">Your stay</p>
+        <h2>Make it <em>yours.</em></h2>
+        <p class="modal-room">{{ room.name }} &middot; {{ flow.nights() }} nights</p>
+
+        <form (ngSubmit)="submit()" class="guest-form" novalidate>
+          <label>
+            Full name
+            <input
+              name="fullName"
+              [ngModel]="flow.guest().fullName"
+              (ngModelChange)="updateGuest('fullName', $event)"
+              (blur)="flow.markTouched('fullName')"
+              [class.input-error]="flow.touched()['fullName'] && flow.formErrors().fullName"
+              required
+            />
+            @if (flow.touched()['fullName'] && flow.formErrors().fullName) {
+              <span class="field-error"><nh-icon name="alert" [size]="12" /> {{ flow.formErrors().fullName }}</span>
+            }
+          </label>
+          <label>
+            Email
+            <input
+              name="email"
+              type="email"
+              [ngModel]="flow.guest().email"
+              (ngModelChange)="updateGuest('email', $event)"
+              (blur)="flow.markTouched('email')"
+              [class.input-error]="flow.touched()['email'] && flow.formErrors().email"
+              required
+            />
+            @if (flow.touched()['email'] && flow.formErrors().email) {
+              <span class="field-error"><nh-icon name="alert" [size]="12" /> {{ flow.formErrors().email }}</span>
+            }
+          </label>
+          <label>
+            Phone
+            <input
+              name="phone"
+              type="tel"
+              [ngModel]="flow.guest().phone"
+              (ngModelChange)="updateGuest('phone', $event)"
+              (blur)="flow.markTouched('phone')"
+              [class.input-error]="flow.touched()['phone'] && flow.formErrors().phone"
+              required
+            />
+            @if (flow.touched()['phone'] && flow.formErrors().phone) {
+              <span class="field-error"><nh-icon name="alert" [size]="12" /> {{ flow.formErrors().phone }}</span>
+            }
+          </label>
+          <label>
+            Anything we should know?
+            <textarea
+              name="specialRequest"
+              rows="3"
+              [ngModel]="flow.guest().specialRequest"
+              (ngModelChange)="updateGuest('specialRequest', $event)"
+            ></textarea>
+          </label>
+
+          <div class="summary-card">
+            <div class="summary-row"><span>Dates</span><strong>{{ flow.checkIn() | date:'d MMM' }} &ndash; {{ flow.checkOut() | date:'d MMM yyyy' }}</strong></div>
+            <div class="summary-row"><span>Guests</span><strong>{{ flow.guests() }}</strong></div>
+            <div class="summary-row"><span>{{ flow.nights() }} nights &times; {{ room.pricePerNight | currency:'INR':'symbol-narrow':'1.0-0' }}</span><strong>{{ flow.total() | currency:'INR':'symbol-narrow':'1.0-0' }}</strong></div>
+            <div class="summary-row summary-row--total"><span>Total due</span><strong>{{ flow.total() | currency:'INR':'symbol-narrow':'1.0-0' }}</strong></div>
+          </div>
+
+          @if (flow.bookingError()) {
+            <p class="form-note form-note--error"><nh-icon name="alert" [size]="14" /> {{ flow.bookingError() }}</p>
+          }
+
+          
+@if (flow.checkingAlternatives()) {
+  <div class="alternative-rooms-loading">
+    <span class="spinner" aria-hidden="true"></span>
+    <p>Checking other available rooms...</p>
+  </div>
+}
+
+@if (flow.alternativeRooms().length > 0) {
+  <section class="alternative-rooms">
+    <h3>Other Rooms Available</h3>
+    <p>
+      Your selected room is unavailable for these dates.
+      Choose another room for the same dates.
+    </p>
+
+    @for (alternative of flow.alternativeRooms(); track alternative.id) {
+      <article class="alternative-room-card">
+        <div>
+          <h4>{{ alternative.name }}</h4>
+          <p>
+            {{ alternative.pricePerNight
+              | currency:'INR':'symbol-narrow':'1.0-0' }}
+            per night
+          </p>
+        </div>
+
+        <button
+          class="button button--solid"
+          type="button"
+          (click)="flow.selectRoom(alternative)"
+        >
+          Choose This Room
+        </button>
+      </article>
+    }
+  </section>
+}
+
+
+          <button class="button button--solid button--wide" type="submit" [disabled]="flow.submitting()">
+            @if (flow.submitting()) {
+              <span class="spinner" aria-hidden="true"></span> Sending request&hellip;
+            } @else {
+              Proceed to Payment <span>&rarr;</span>
+            }
+          </button>
+        </form>
+      } @else {
+        <div class="booking-payment">
+          @switch (payment.state()) {
+            @case ('CREATING_BOOKING') {
+              <div class="booking-payment__pending">
+                <span class="booking-payment__spinner" aria-hidden="true"></span>
+                <p class="booking-payment__status">Creating your booking&hellip;</p>
+              </div>
+            }
+            @case ('CREATING_PAYMENT_ORDER') {
+              <div class="booking-payment__pending">
+                <span class="booking-payment__spinner" aria-hidden="true"></span>
+                <p class="booking-payment__status">Preparing secure payment&hellip;</p>
+              </div>
+            }
+            @case ('PAYMENT_OPEN') {
+              <div class="booking-payment__pending">
+                <span class="booking-payment__spinner" aria-hidden="true"></span>
+                <p class="booking-payment__status">Complete your payment in the Razorpay window.</p>
+                <p class="booking-payment__message">If you don't see it, check for a blocked pop-up.</p>
+              </div>
+            }
+            @case ('VERIFYING_PAYMENT') {
+              <div class="booking-payment__pending">
+                <span class="booking-payment__spinner" aria-hidden="true"></span>
+                <p class="booking-payment__status">Confirming your payment&hellip;</p>
+              </div>
+            }
+            @case ('PAYMENT_SUCCESS') {
+              @if (flow.bookingConfirmation(); as confirmation) {
+                <div class="booking-payment__success confirmation">
+                  <div class="confirmation__icon"><nh-icon name="check" [size]="26" /></div>
+                  <p class="eyebrow">Payment successful</p>
+                  <h2>Booking<br /><em>Confirmed.</em></h2>
+                  <p class="booking-payment__message">
+                    Your booking reference is <strong>{{ confirmation.reference }}</strong>.
+                  </p>
+                  <div class="summary-card">
+                    <div class="summary-row"><span>Room</span><strong>{{ confirmation.room.name }}</strong></div>
+                    <div class="summary-row"><span>Dates</span><strong>{{ confirmation.checkIn | date:'d MMM' }} &ndash; {{ confirmation.checkOut | date:'d MMM yyyy' }}</strong></div>
+                    <div class="summary-row"><span>Guests</span><strong>{{ confirmation.guests }}</strong></div>
+                    @if (payment.verifiedPayment(); as paid) {
+                      <div class="summary-row"><span>Payment status</span><strong>{{ paid.status }}</strong></div>
+                      <div class="summary-row summary-row--total"><span>Amount paid</span><strong>{{ paid.amount | currency:confirmation.currency:'symbol-narrow':'1.0-0' }}</strong></div>
+                    } @else {
+                      <div class="summary-row summary-row--total"><span>Amount paid</span><strong>{{ confirmation.totalAmount | currency:confirmation.currency:'symbol-narrow':'1.0-0' }}</strong></div>
+                    }
+                  </div>
+                  <button class="button button--solid button--wide" type="button" (click)="close()">Done</button>
+                </div>
+              }
+            }
+            @case ('PAYMENT_CANCELLED') {
+              <div class="booking-payment__pending">
+                <p class="booking-payment__status">Payment cancelled</p>
+                <p class="booking-payment__message">Payment was cancelled. Your room is temporarily held while you complete payment.</p>
+                <div class="booking-payment__actions">
+                  <button class="button button--solid button--wide booking-payment__retry" type="button" (click)="retryPayment()">Try Payment Again</button>
+                </div>
+              </div>
+            }
+            @case ('PAYMENT_FAILED') {
+              <div class="booking-payment__failure">
+                <p class="booking-payment__status">Payment could not be completed</p>
+                <p class="booking-payment__message"><nh-icon name="alert" [size]="14" /> {{ payment.errorMessage() }}</p>
+                <div class="booking-payment__actions">
+                  @if (payment.canRetry()) {
+                    <button class="button button--solid button--wide booking-payment__retry" type="button" (click)="retryPayment()">Try Payment Again</button>
+                  } @else {
+                    <button class="button button--solid button--wide booking-payment__new-booking" type="button" (click)="startNewBooking()">Start New Booking</button>
+                  }
+                </div>
+              </div>
+            }
+            @case ('PAYMENT_UNKNOWN') {
+              <div class="booking-payment__pending">
+                <span class="booking-payment__spinner" aria-hidden="true"></span>
+                <p class="booking-payment__status">Checking your payment status&hellip;</p>
+                <p class="booking-payment__message">{{ payment.errorMessage() }}</p>
+                <div class="booking-payment__actions">
+                  <button class="button button--ghost button--wide" type="button" (click)="checkStatus()">Check status again</button>
+                </div>
+              </div>
+            }
+            @case ('BOOKING_EXPIRED') {
+              <div class="booking-payment__failure">
+                <p class="booking-payment__status">This payment session has expired</p>
+                <p class="booking-payment__message">Please check availability and start a new booking.</p>
+                <div class="booking-payment__actions">
+                  <button class="button button--solid button--wide booking-payment__new-booking" type="button" (click)="startNewBooking()">Start New Booking</button>
+                </div>
+              </div>
+            }
+          }
+        </div>
+      }
+    </section>
+  </div>
+}

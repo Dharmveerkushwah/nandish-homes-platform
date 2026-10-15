@@ -1,0 +1,12 @@
+<main class="unauth">
+  <section class="unauth__card">
+    <span class="unauth__icon"><nh-icon name="lock" [size]="26" /></span>
+    <p class="eyebrow">Access restricted</p>
+    <h1>This section isn't part of your role.</h1>
+    <p>Your account is signed in as <strong>{{ role }}</strong>, which doesn't include this page. If you need access, ask a Super Admin to update your role under Users &amp; Roles.</p>
+    <div class="unauth__actions">
+      <button class="button button--solid" type="button" (click)="goToDashboard()">Back to dashboard</button>
+      <button class="button button--ghost" type="button" (click)="signOut()">Sign out</button>
+    </div>
+  </section>
+</main>

@@ -1,0 +1,38 @@
+<section class="admin-page">
+  <div class="admin-page__head">
+    <div><h1>WhatsApp logs</h1><p>Recent WhatsApp send attempts (booking confirmations, reminders) and their delivery status.</p></div>
+  </div>
+
+  @if (error()) { <nh-not-connected>{{ error() }}</nh-not-connected> }
+
+  <div class="admin-toolbar">
+    <div class="admin-search"><nh-icon name="search" [size]="14" /><input type="search" placeholder="Search by phone, type, booking, status…" [ngModel]="search()" (ngModelChange)="search.set($event)" /></div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading WhatsApp logs…</span></div>
+  } @else if (!filtered().length) {
+    <div class="empty-state"><nh-icon name="whatsapp" [size]="22" /><p>No WhatsApp messages logged yet.</p></div>
+  } @else {
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead><tr><th>Sent</th><th>Phone</th><th>Type</th><th>Booking</th><th>Message</th><th>Status</th></tr></thead>
+        <tbody>
+          @for (entry of filtered(); track entry.id) {
+            <tr>
+              <td>{{ entry.createdAt | date:'d MMM yyyy, h:mm a' }}</td>
+              <td>{{ entry.phone }}</td>
+              <td>{{ entry.messageType }}</td>
+              <td>{{ entry.bookingReference ?? '—' }}</td>
+              <td>{{ entry.messageText }}</td>
+              <td>
+                <span class="badge" [class]="'badge--' + entry.status.toLowerCase()">{{ entry.status }}</span>
+                @if (entry.errorMessage) { <div class="admin-note">{{ entry.errorMessage }}</div> }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

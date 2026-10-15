@@ -1,0 +1,70 @@
+<section class="admin-page">
+  <div class="admin-page__head">
+    <div>
+      <h1>Booking management</h1>
+      <p>Search, filter and act on every reservation.</p>
+    </div>
+  </div>
+
+  @if (data.error()) {
+    <div class="error-state"><nh-icon name="alert" [size]="14" /><span>{{ data.error() }}</span></div>
+  }
+
+  <div class="admin-toolbar">
+    <div class="admin-search">
+      <nh-icon name="search" [size]="14" />
+      <input type="search" placeholder="Search reference, guest, phone…" [ngModel]="search()" (ngModelChange)="onSearch($event)" />
+    </div>
+    <select class="admin-select" [ngModel]="statusFilter()" (ngModelChange)="onStatusChange($event)" aria-label="Filter by status">
+      @for (option of statusOptions; track option.value) { <option [value]="option.value">{{ option.label }}</option> }
+    </select>
+    <select class="admin-select" [ngModel]="roomFilter()" (ngModelChange)="onRoomChange($event)" aria-label="Filter by room">
+      <option value="all">All rooms</option>
+      @for (room of roomOptions(); track room.id) { <option [value]="room.id">{{ room.name }}</option> }
+    </select>
+    <input class="admin-select" type="date" [ngModel]="dateFilter()" (ngModelChange)="onDateChange($event)" aria-label="Filter by check-in date" />
+    @if (search() || statusFilter() !== 'all' || roomFilter() !== 'all' || dateFilter()) {
+      <button class="text-link" type="button" (click)="clearFilters()">Clear filters</button>
+    }
+  </div>
+
+  @if (data.loading()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading bookings…</span></div>
+  } @else if (!filtered().length) {
+    <div class="empty-state"><nh-icon name="list" [size]="22" /><p>No bookings match these filters.</p></div>
+  } @else {
+    <div class="admin-table-wrap">
+      <table class="admin-table">
+        <thead>
+          <tr>
+            <th class="sortable" (click)="setSort('reference')">Reference <span class="arrow">{{ sortKey() === 'reference' ? (sortDir() === 'asc' ? '↑' : '↓') : '' }}</span></th>
+            <th>Guest</th>
+            <th>Room</th>
+            <th class="sortable" (click)="setSort('checkIn')">Check-in <span class="arrow">{{ sortKey() === 'checkIn' ? (sortDir() === 'asc' ? '↑' : '↓') : '' }}</span></th>
+            <th class="sortable" (click)="setSort('checkOut')">Check-out <span class="arrow">{{ sortKey() === 'checkOut' ? (sortDir() === 'asc' ? '↑' : '↓') : '' }}</span></th>
+            <th class="sortable" (click)="setSort('amount')">Amount <span class="arrow">{{ sortKey() === 'amount' ? (sortDir() === 'asc' ? '↑' : '↓') : '' }}</span></th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (booking of paged(); track booking.reference) {
+            <tr (click)="openBooking(booking.reference)">
+              <td><strong>{{ booking.reference }}</strong></td>
+              <td>{{ booking.guestName ?? 'Guest' }}</td>
+              <td>{{ booking.room.name }}</td>
+              <td>{{ booking.checkIn | date:'d MMM yyyy' }}</td>
+              <td>{{ booking.checkOut | date:'d MMM yyyy' }}</td>
+              <td>{{ booking.totalAmount | currency:'INR':'symbol-narrow':'1.0-0' }}</td>
+              <td><span [class]="'badge badge--' + statusClass(booking.status)">{{ readableStatus(booking.status) }}</span></td>
+              <td class="row-actions">
+                <a class="icon-btn" [routerLink]="['/admin/bookings', booking.reference]" (click)="$event.stopPropagation()" aria-label="View booking"><nh-icon name="eye" [size]="15" /></a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <nh-pagination [total]="filtered().length" [pageSize]="pageSize" [page]="page()" (pageChange)="page.set($event)" />
+  }
+</section>

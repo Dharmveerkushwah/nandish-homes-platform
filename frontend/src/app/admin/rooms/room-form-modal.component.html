@@ -1,0 +1,119 @@
+<div class="admin-modal-backdrop" (click)="closed.emit()">
+  <div class="admin-modal admin-modal--wide" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <button class="icon-btn admin-modal__close" type="button" (click)="closed.emit()" aria-label="Close"><nh-icon name="close" [size]="16" /></button>
+    <h2>{{ isEdit() ? 'Edit room' : 'Add room' }}</h2>
+
+    <div class="tab-pills" style="margin-bottom:16px">
+      <button type="button" class="tab-pill" [class.active]="activeTab() === 'details'" (click)="activeTab.set('details')">Details</button>
+      @if (isEdit()) {
+        <button type="button" class="tab-pill" [class.active]="activeTab() === 'images'" (click)="activeTab.set('images')">Images ({{ images().length }})</button>
+        <button type="button" class="tab-pill" [class.active]="activeTab() === 'availability'" (click)="activeTab.set('availability')">Availability</button>
+      }
+    </div>
+
+    @if (activeTab() === 'details') {
+      <div class="admin-form">
+        <div class="admin-form__row">
+          <label>Room name<input type="text" [(ngModel)]="form.name" placeholder="Sunset Pool Villa" /></label>
+          <label>Room code<input type="text" [(ngModel)]="form.code" placeholder="V-01" /></label>
+        </div>
+        @if (errors()['name']) { <p class="admin-form__error">{{ errors()['name'] }}</p> }
+        @if (errors()['code']) { <p class="admin-form__error">{{ errors()['code'] }}</p> }
+
+        <div class="admin-form__row">
+          <label>Room type<select [(ngModel)]="form.roomTypeId"><option [ngValue]="null" disabled>Select a room type…</option>@for (rt of roomTypes(); track rt.id) { <option [ngValue]="rt.id">{{ rt.name }}</option> }</select></label>
+          <label>Status<select [(ngModel)]="form.status">@for (opt of statusOptions; track opt.value) { <option [value]="opt.value">{{ opt.label }}</option> }</select></label>
+        </div>
+        @if (errors()['roomTypeId']) { <p class="admin-form__error">{{ errors()['roomTypeId'] }}</p> }
+
+        <div class="admin-form__row">
+          <label>Floor / label (optional)<input type="text" [(ngModel)]="form.floorLabel" placeholder="Ground floor" /></label>
+          <label>Bed info (optional)<input type="text" [(ngModel)]="form.bedInfo" placeholder="1 king bed" /></label>
+        </div>
+
+        <label>Description<textarea [(ngModel)]="form.description" rows="3" placeholder="Describe this room or villa… (leave blank to use the room type's shared description)"></textarea></label>
+        <label>Short description (optional)<input type="text" [(ngModel)]="form.shortDescription" placeholder="One-line summary for cards/listings" /></label>
+        <label>Amenities (comma-separated)<input type="text" [(ngModel)]="form.amenitiesText" placeholder="Private pool, Free WiFi, Air conditioning" /></label>
+
+        <div class="admin-form__row">
+          <label>Size (sqft)<input type="number" min="1" [(ngModel)]="form.sizeSqft" /></label>
+          <label>Price override (₹, optional)<input type="number" min="0" [(ngModel)]="form.priceOverride" placeholder="Leave blank to use the room type's base price" /></label>
+        </div>
+        @if (errors()['sizeSqft']) { <p class="admin-form__error">{{ errors()['sizeSqft'] }}</p> }
+        @if (errors()['priceOverride']) { <p class="admin-form__error">{{ errors()['priceOverride'] }}</p> }
+
+        <div class="admin-form__row">
+          <label>Cover image URL<input type="text" [(ngModel)]="form.imageUrl" placeholder="https://…" /></label>
+          <div style="display:flex;flex-direction:column;justify-content:flex-end;gap:8px">
+            <span class="checkbox-row"><input type="checkbox" id="featured" [(ngModel)]="form.featured" /><label for="featured" style="text-transform:none;font-weight:500">Feature on homepage</label></span>
+            <span class="checkbox-row"><input type="checkbox" id="hasPoolAccess" [(ngModel)]="form.hasPoolAccess" /><label for="hasPoolAccess" style="text-transform:none;font-weight:500">Has private pool access</label></span>
+          </div>
+        </div>
+        @if (!isEdit()) { <p class="detail-note">Save this room first, then use the Images tab to add more photos and the Availability tab to block dates.</p> }
+      </div>
+    }
+
+    @if (activeTab() === 'images' && room(); as r) {
+      <div class="admin-form">
+        <p class="detail-note">Add image URLs (real file uploads need a backend upload endpoint, which isn't in the current API). Each image is saved immediately.</p>
+        <div style="display:flex;gap:8px">
+          <input type="text" [(ngModel)]="newImageUrl" placeholder="https://…" style="flex:1" (keydown.enter)="addImage()" />
+          <button class="button button--solid button--sm" type="button" (click)="addImage()">Add</button>
+        </div>
+
+        @if (loadingImages()) {
+          <p class="admin-empty">Loading images…</p>
+        } @else {
+          <div class="room-image-list">
+            @for (image of images(); track image.id) {
+              <div class="room-image-list__item">
+                <img [src]="image.imageUrl" alt="" nhImgFallback="Room photo" />
+                <span class="room-image-list__url">{{ image.imageUrl }}</span>
+                @if (image.primary) { <span class="badge badge--active">Primary</span> }
+                <div class="row-actions">
+                  @if (!image.primary) { <button class="icon-btn" type="button" (click)="setPrimary(image.id)" aria-label="Set as primary"><nh-icon name="star" [size]="14" /></button> }
+                  <button class="icon-btn icon-btn--danger" type="button" (click)="removeImage(image.id)" aria-label="Remove image"><nh-icon name="trash" [size]="14" /></button>
+                </div>
+              </div>
+            }
+            @if (!images().length) { <p class="admin-empty">No images added yet.</p> }
+          </div>
+        }
+      </div>
+    }
+
+    @if (activeTab() === 'availability' && room(); as r) {
+      <div class="admin-form">
+        <p class="detail-note">Blocked/maintenance periods for this room, saved to the backend.</p>
+        <div class="admin-form__row">
+          <label>From<input type="date" [(ngModel)]="blockFrom" /></label>
+          <label>To<input type="date" [(ngModel)]="blockTo" /></label>
+        </div>
+        <div class="admin-form__row">
+          <label>Reason<select [(ngModel)]="blockReason"><option value="MAINTENANCE">Maintenance</option><option value="BLOCKED">Blocked</option></select></label>
+          <label>Note (optional)<input type="text" [(ngModel)]="blockNote" placeholder="e.g. Repainting" /></label>
+        </div>
+        <div class="admin-form__actions" style="justify-content:flex-start">
+          <button class="button button--ghost button--sm" type="button" (click)="addBlock()">Add block</button>
+        </div>
+        <div class="room-image-list">
+          @for (block of availability.blocksFor(r.id); track block.id) {
+            <div class="room-image-list__item">
+              <span class="badge" [class]="'badge--' + (block.reason === 'MAINTENANCE' ? 'maintenance' : 'blocked')">{{ block.reason }}</span>
+              <span class="room-image-list__url">{{ block.from }} → {{ block.to }} @if (block.note) { · {{ block.note }} }</span>
+              <button class="icon-btn icon-btn--danger" type="button" (click)="availability.removeBlock(block.id)" aria-label="Remove block"><nh-icon name="trash" [size]="14" /></button>
+            </div>
+          }
+          @if (!availability.blocksFor(r.id).length) { <p class="admin-empty">No blocked periods for this room.</p> }
+        </div>
+      </div>
+    }
+
+    <div class="admin-form__actions">
+      <button class="button button--ghost" type="button" (click)="closed.emit()">Cancel</button>
+      @if (activeTab() === 'details') {
+        <button class="button button--solid" type="button" [disabled]="saving()" (click)="save()">{{ saving() ? 'Saving…' : (isEdit() ? 'Save changes' : 'Create room') }}</button>
+      }
+    </div>
+  </div>
+</div>

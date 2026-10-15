@@ -1,0 +1,9 @@
+:host{display:block}
+.review-admin-card{margin-bottom:12px}
+.review-admin-card__head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
+.review-admin-card__head strong{color:#1a3554;font-size:12.5px;margin-right:8px}
+.review-admin-card__stars{color:#c49b3e;display:inline-flex;gap:1px;vertical-align:middle}
+.review-admin-card__date{display:block;color:#8a97a3;font-size:9.5px;margin-top:2px}
+.review-admin-card__comment{color:#33475c;font-size:12px;line-height:1.6;margin:0 0 12px}
+.badge--hidden{background:#fbe2e4;color:#bf5358}
+.badge--pending{background:#fff0d5;color:#b57a1b}

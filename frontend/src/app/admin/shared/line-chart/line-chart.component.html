@@ -1,0 +1,16 @@
+@if (points().length) {
+  <svg [attr.viewBox]="'0 0 ' + width + ' ' + height" preserveAspectRatio="none" class="line-chart" role="img" aria-label="Revenue trend">
+    <path [attr.d]="areaPath()" class="line-chart__area" />
+    <path [attr.d]="linePath()" class="line-chart__line" />
+    @for (point of plot(); track point.label) {
+      <circle [attr.cx]="point.x" [attr.cy]="point.y" r="3.4" class="line-chart__dot">
+        <title>{{ point.label }}: {{ point.amount | currency:'INR':'symbol-narrow':'1.0-0' }}</title>
+      </circle>
+    }
+  </svg>
+  <div class="line-chart__axis">
+    @for (point of plot(); track point.label) { <span>{{ point.label }}</span> }
+  </div>
+} @else {
+  <p class="line-chart__empty">No revenue data yet.</p>
+}

@@ -1,0 +1,5 @@
+:host{display:block}
+.faq-admin-row{display:flex;align-items:flex-start;gap:12px;border:1px solid #edf1f4;border-radius:6px;padding:12px}
+.faq-admin-row__body{flex:1;min-width:0}
+.faq-admin-row__body strong{display:block;color:#1a3554;font-size:12px;margin-bottom:3px}
+.faq-admin-row__body p{margin:0;color:#5c7186;font-size:11px;line-height:1.5}

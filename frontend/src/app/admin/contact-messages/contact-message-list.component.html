@@ -1,0 +1,47 @@
+<section class="admin-page">
+  <div class="admin-page__head">
+    <div><h1>Contact messages</h1><p>Guest messages submitted through the public Contact form.</p></div>
+  </div>
+
+  @if (error()) { <nh-not-connected>{{ error() }}</nh-not-connected> }
+
+  <div class="tab-pills" style="margin-bottom:14px">
+    <button type="button" class="tab-pill" [class.active]="filter() === 'ALL'" (click)="setFilter('ALL')">All</button>
+    @for (s of statuses; track s) {
+      <button type="button" class="tab-pill" [class.active]="filter() === s" (click)="setFilter(s)">{{ s }}</button>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading messages…</span></div>
+  } @else if (!messages().length) {
+    <div class="empty-state"><nh-icon name="mail" [size]="22" /><p>No messages in this view.</p></div>
+  } @else {
+    <div class="contact-message-list">
+      @for (message of messages(); track message.id) {
+        <div class="contact-message-row" [class.unread]="message.status === 'NEW'">
+          <div class="contact-message-row__head" (click)="toggleExpand(message)">
+            <div>
+              <strong>{{ message.name }}</strong>
+              <span class="contact-message-row__meta">{{ message.email }} @if (message.phone) { &middot; {{ message.phone }} }</span>
+            </div>
+            <span class="badge" [class]="'badge--' + message.status.toLowerCase()">{{ message.status }}</span>
+            <time>{{ message.createdAt | date:'d MMM yyyy, h:mm a' }}</time>
+          </div>
+          @if (expanded() === message.id) {
+            <div class="contact-message-row__body">
+              <p>{{ message.message }}</p>
+              <div class="contact-message-row__actions">
+                <select [ngModel]="message.status" (ngModelChange)="setStatus(message, $event)">
+                  @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+                </select>
+                <a class="button button--ghost button--sm" [href]="'mailto:' + message.email">Reply by email</a>
+                <button class="button button--ghost button--sm" type="button" (click)="remove(message)">Delete</button>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  }
+</section>

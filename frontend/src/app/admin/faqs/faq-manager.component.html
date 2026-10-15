@@ -1,0 +1,47 @@
+<section class="admin-page">
+  <div class="admin-page__head">
+    <div><h1>FAQ management</h1><p>Manage the questions guests see on the public FAQ page.</p></div>
+    <div class="admin-page__actions"><button class="button button--solid button--sm" type="button" (click)="startAdd()"><nh-icon name="plus" [size]="13" />Add FAQ</button></div>
+  </div>
+
+  @if (error()) { <nh-not-connected>{{ error() }}</nh-not-connected> }
+
+  @if (editing(); as edit) {
+    <div class="admin-card" style="margin:14px 0">
+      <div class="admin-card-head"><div><h2>{{ edit === 'new' ? 'New FAQ' : 'Edit FAQ' }}</h2></div></div>
+      <div class="admin-form">
+        <label>Question<input type="text" [ngModel]="draftQuestion()" (ngModelChange)="draftQuestion.set($event)" /></label>
+        <label>Answer<textarea rows="3" [ngModel]="draftAnswer()" (ngModelChange)="draftAnswer.set($event)"></textarea></label>
+        <div class="admin-form__actions">
+          <button class="button button--ghost" type="button" (click)="cancelEdit()">Cancel</button>
+          <button class="button button--solid" type="button" [disabled]="saving() || !draftQuestion().trim() || !draftAnswer().trim()" (click)="save()">{{ saving() ? 'Saving…' : 'Save' }}</button>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading FAQs…</span></div>
+  } @else if (!faqs().length) {
+    <div class="empty-state"><nh-icon name="help" [size]="22" /><p>No FAQs yet.</p></div>
+  } @else {
+    <div class="room-image-list" style="margin-top:14px">
+      @for (faq of faqs(); track faq.id; let i = $index) {
+        <div class="faq-admin-row">
+          <div class="faq-admin-row__body">
+            <strong>{{ faq.question }}</strong>
+            <p>{{ faq.answer }}</p>
+          </div>
+          <span class="badge" [class]="'badge--' + ((faq.active ?? true) ? 'active' : 'inactive')">{{ (faq.active ?? true) ? 'Active' : 'Inactive' }}</span>
+          <div class="row-actions">
+            <button class="icon-btn" type="button" (click)="move(faq, -1)" [disabled]="i === 0" aria-label="Move up"><nh-icon name="chevron-left" [size]="14" /></button>
+            <button class="icon-btn" type="button" (click)="move(faq, 1)" [disabled]="i === faqs().length - 1" aria-label="Move down"><nh-icon name="chevron-right" [size]="14" /></button>
+            <button class="icon-btn" type="button" (click)="startEdit(faq)" aria-label="Edit FAQ"><nh-icon name="edit" [size]="14" /></button>
+            <button class="icon-btn" type="button" (click)="toggleActive(faq)" [attr.aria-label]="(faq.active ?? true) ? 'Deactivate' : 'Activate'"><nh-icon [name]="(faq.active ?? true) ? 'ban' : 'check'" [size]="14" /></button>
+            <button class="icon-btn icon-btn--danger" type="button" (click)="remove(faq)" aria-label="Delete FAQ"><nh-icon name="trash" [size]="14" /></button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</section>

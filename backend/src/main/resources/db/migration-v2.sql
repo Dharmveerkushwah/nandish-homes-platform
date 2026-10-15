@@ -1,0 +1,336 @@
+-- =====================================================================
+-- Nandish Homes - migration v2 (backend gap-development pass)
+-- =====================================================================
+-- Purpose: fill schema gaps required by the 36-item backend gap doc
+-- WITHOUT touching spring.jpa.hibernate.ddl-auto=validate and WITHOUT
+-- dropping or rewriting anything schema.sql already defines correctly.
+--
+-- Every statement below is individually guarded (checked against
+-- USER_TABLES / USER_TAB_COLUMNS / USER_CONSTRAINTS / USER_SEQUENCES
+-- first) so this script is safe to run more than once, and safe to run
+-- against a database that already has some of these objects. Nothing
+-- here is destructive: it only creates sequences, adds nullable/defaulted
+-- columns, and adds foreign keys - no DROP, no data rewrite.
+--
+-- Run this with the database user that owns the existing NH_* tables.
+-- Never place database credentials in this script or in source control.
+--
+-- IMPORTANT (per the gap doc): if a prior deployment is missing
+-- NH_BOOKING_GUESTS at runtime even though schema.sql defines it, that is
+-- schema drift on the live instance, not a source-code gap - this script
+-- re-asserts it defensively (section 0) rather than disabling validation.
+-- =====================================================================
+
+-- ---------------------------------------------------------------------
+-- 0. Re-assert NH_BOOKING_GUESTS in case the live instance drifted from
+--    schema.sql (guarded create - a no-op if it is already correct).
+-- ---------------------------------------------------------------------
+DECLARE
+  tbl_exists NUMBER;
+BEGIN
+  SELECT COUNT(*) INTO tbl_exists FROM USER_TABLES WHERE TABLE_NAME = 'NH_BOOKING_GUESTS';
+  IF tbl_exists = 0 THEN
+    EXECUTE IMMEDIATE '
+      CREATE TABLE NH_BOOKING_GUESTS (
+        BOOKING_ID NUMBER(19) NOT NULL,
+        GUEST_ID NUMBER(19) NOT NULL,
+        CONSTRAINT PK_NH_BOOKING_GUESTS PRIMARY KEY (BOOKING_ID, GUEST_ID),
+        CONSTRAINT FK_NH_BG_BOOKING FOREIGN KEY (BOOKING_ID) REFERENCES NH_BOOKINGS(BOOKING_ID),
+        CONSTRAINT FK_NH_BG_GUEST FOREIGN KEY (GUEST_ID) REFERENCES NH_GUESTS(GUEST_ID)
+      )';
+  END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- Helper pattern used throughout: guarded CREATE SEQUENCE / ADD COLUMN /
+-- ADD CONSTRAINT via PL/SQL, catching "already exists" style errors.
+-- ---------------------------------------------------------------------
+
+-- 1. New sequences for entities that previously had no ID generator.
+BEGIN EXECUTE IMMEDIATE 'CREATE SEQUENCE NH_ROOM_IMAGE_SEQ START WITH 1 INCREMENT BY 1';
+EXCEPTION WHEN OTHERS THEN IF SQLCODE != -955 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'CREATE SEQUENCE NH_NOTIFICATION_SEQ START WITH 1 INCREMENT BY 1';
+EXCEPTION WHEN OTHERS THEN IF SQLCODE != -955 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'CREATE SEQUENCE NH_EMAIL_LOG_SEQ START WITH 1 INCREMENT BY 1';
+EXCEPTION WHEN OTHERS THEN IF SQLCODE != -955 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'CREATE SEQUENCE NH_WHATSAPP_LOG_SEQ START WITH 1 INCREMENT BY 1';
+EXCEPTION WHEN OTHERS THEN IF SQLCODE != -955 THEN RAISE; END IF; END;
+/
+BEGIN EXECUTE IMMEDIATE 'CREATE SEQUENCE NH_AUDIT_SEQ START WITH 1 INCREMENT BY 1';
+EXCEPTION WHEN OTHERS THEN IF SQLCODE != -955 THEN RAISE; END IF; END;
+/
+
+-- ---------------------------------------------------------------------
+-- 2. NH_BOOKINGS - booking-details, offer-integration and booking-source
+--    gaps (doc items 4, 17, 27).
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_BOOKINGS' AND COLUMN_NAME='BASE_AMOUNT';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_BOOKINGS ADD (BASE_AMOUNT NUMBER(12,2))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_BOOKINGS' AND COLUMN_NAME='DISCOUNT_AMOUNT';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_BOOKINGS ADD (DISCOUNT_AMOUNT NUMBER(12,2) DEFAULT 0 NOT NULL)'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_BOOKINGS' AND COLUMN_NAME='TAX_AMOUNT';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_BOOKINGS ADD (TAX_AMOUNT NUMBER(12,2) DEFAULT 0 NOT NULL)'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_BOOKINGS' AND COLUMN_NAME='UPDATED_AT';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_BOOKINGS ADD (UPDATED_AT TIMESTAMP WITH TIME ZONE)'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_BOOKINGS' AND COLUMN_NAME='OFFER_ID';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_BOOKINGS ADD (OFFER_ID NUMBER(19))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_BOOKINGS' AND COLUMN_NAME='SOURCE';
+  IF c = 0 THEN EXECUTE IMMEDIATE q'[ALTER TABLE NH_BOOKINGS ADD (SOURCE VARCHAR2(30) DEFAULT 'WEBSITE' NOT NULL)]'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_CONSTRAINTS WHERE TABLE_NAME='NH_BOOKINGS' AND CONSTRAINT_NAME='FK_NH_BOOKING_OFFER';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_BOOKINGS ADD CONSTRAINT FK_NH_BOOKING_OFFER FOREIGN KEY (OFFER_ID) REFERENCES NH_OFFERS(OFFER_ID)'; END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 3. NH_ROOM_BLOCKS - maintenance flag + created_at (doc item 6).
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_ROOM_BLOCKS' AND COLUMN_NAME='IS_MAINTENANCE';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_ROOM_BLOCKS ADD (IS_MAINTENANCE NUMBER(1) DEFAULT 0 NOT NULL)'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_ROOM_BLOCKS' AND COLUMN_NAME='CREATED_AT';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_ROOM_BLOCKS ADD (CREATED_AT TIMESTAMP WITH TIME ZONE DEFAULT SYSTIMESTAMP NOT NULL)'; END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 4. NH_OFFERS - description + optional applicable room type (doc item 17).
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_OFFERS' AND COLUMN_NAME='DESCRIPTION';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_OFFERS ADD (DESCRIPTION VARCHAR2(1000))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_OFFERS' AND COLUMN_NAME='APPLICABLE_ROOM_TYPE_ID';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_OFFERS ADD (APPLICABLE_ROOM_TYPE_ID NUMBER(19))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_CONSTRAINTS WHERE TABLE_NAME='NH_OFFERS' AND CONSTRAINT_NAME='FK_NH_OFFER_ROOM_TYPE';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_OFFERS ADD CONSTRAINT FK_NH_OFFER_ROOM_TYPE FOREIGN KEY (APPLICABLE_ROOM_TYPE_ID) REFERENCES NH_ROOM_TYPES(ROOM_TYPE_ID)'; END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 5. NH_ROOM_TYPES - category (VILLA / POOL_ROOM / NON_POOL_ROOM) (doc item 10).
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_ROOM_TYPES' AND COLUMN_NAME='CATEGORY';
+  IF c = 0 THEN EXECUTE IMMEDIATE q'[ALTER TABLE NH_ROOM_TYPES ADD (CATEGORY VARCHAR2(30) DEFAULT 'VILLA' NOT NULL)]'; END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 6. NH_ROOMS - description/short description/bed info/pool access (doc item 7).
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_ROOMS' AND COLUMN_NAME='DESCRIPTION';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_ROOMS ADD (DESCRIPTION VARCHAR2(2000))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_ROOMS' AND COLUMN_NAME='SHORT_DESCRIPTION';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_ROOMS ADD (SHORT_DESCRIPTION VARCHAR2(300))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_ROOMS' AND COLUMN_NAME='BED_INFO';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_ROOMS ADD (BED_INFO VARCHAR2(200))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_ROOMS' AND COLUMN_NAME='HAS_POOL_ACCESS';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_ROOMS ADD (HAS_POOL_ACCESS NUMBER(1) DEFAULT 0 NOT NULL)'; END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 7. NH_ROOM_IMAGES - primary flag + active flag (doc item 8; sort_order
+--    already exists in schema.sql).
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_ROOM_IMAGES' AND COLUMN_NAME='IS_PRIMARY';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_ROOM_IMAGES ADD (IS_PRIMARY NUMBER(1) DEFAULT 0 NOT NULL)'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_ROOM_IMAGES' AND COLUMN_NAME='IS_ACTIVE';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_ROOM_IMAGES ADD (IS_ACTIVE NUMBER(1) DEFAULT 1 NOT NULL)'; END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 8. NH_REVIEWS - guest email, review date, featured flag (doc item 12).
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_REVIEWS' AND COLUMN_NAME='GUEST_EMAIL';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_REVIEWS ADD (GUEST_EMAIL VARCHAR2(180))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_REVIEWS' AND COLUMN_NAME='REVIEW_DATE';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_REVIEWS ADD (REVIEW_DATE DATE DEFAULT SYSDATE NOT NULL)'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_REVIEWS' AND COLUMN_NAME='IS_FEATURED';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_REVIEWS ADD (IS_FEATURED NUMBER(1) DEFAULT 0 NOT NULL)'; END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 9. NH_GALLERY - description, featured, active (doc item 13).
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_GALLERY' AND COLUMN_NAME='DESCRIPTION';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_GALLERY ADD (DESCRIPTION VARCHAR2(1000))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_GALLERY' AND COLUMN_NAME='IS_FEATURED';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_GALLERY ADD (IS_FEATURED NUMBER(1) DEFAULT 0 NOT NULL)'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_GALLERY' AND COLUMN_NAME='IS_ACTIVE';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_GALLERY ADD (IS_ACTIVE NUMBER(1) DEFAULT 1 NOT NULL)'; END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 10. NH_PLACES - slug, category, active, sort_order (doc item 14).
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_PLACES' AND COLUMN_NAME='SLUG';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_PLACES ADD (SLUG VARCHAR2(180))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_PLACES' AND COLUMN_NAME='CATEGORY';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_PLACES ADD (CATEGORY VARCHAR2(60))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_PLACES' AND COLUMN_NAME='IS_ACTIVE';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_PLACES ADD (IS_ACTIVE NUMBER(1) DEFAULT 1 NOT NULL)'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_PLACES' AND COLUMN_NAME='SORT_ORDER';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_PLACES ADD (SORT_ORDER NUMBER(5) DEFAULT 0 NOT NULL)'; END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 11. NH_FAQ - category (doc item 15).
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_FAQ' AND COLUMN_NAME='CATEGORY';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_FAQ ADD (CATEGORY VARCHAR2(60))'; END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 12. NH_NOTIFICATIONS - created_at + type + link reference (doc item 22).
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_NOTIFICATIONS' AND COLUMN_NAME='CREATED_AT';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_NOTIFICATIONS ADD (CREATED_AT TIMESTAMP WITH TIME ZONE DEFAULT SYSTIMESTAMP NOT NULL)'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_NOTIFICATIONS' AND COLUMN_NAME='NOTIFICATION_TYPE';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_NOTIFICATIONS ADD (NOTIFICATION_TYPE VARCHAR2(40))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_NOTIFICATIONS' AND COLUMN_NAME='LINK_REFERENCE';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_NOTIFICATIONS ADD (LINK_REFERENCE VARCHAR2(60))'; END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 13. NH_EMAIL_LOGS - type + error message (doc item 23).
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_EMAIL_LOGS' AND COLUMN_NAME='EMAIL_TYPE';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_EMAIL_LOGS ADD (EMAIL_TYPE VARCHAR2(50))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_EMAIL_LOGS' AND COLUMN_NAME='ERROR_MESSAGE';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_EMAIL_LOGS ADD (ERROR_MESSAGE VARCHAR2(1000))'; END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 14. NH_WHATSAPP_LOGS - message type, booking reference, error (doc item 24).
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_WHATSAPP_LOGS' AND COLUMN_NAME='MESSAGE_TYPE';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_WHATSAPP_LOGS ADD (MESSAGE_TYPE VARCHAR2(50))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_WHATSAPP_LOGS' AND COLUMN_NAME='BOOKING_REFERENCE';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_WHATSAPP_LOGS ADD (BOOKING_REFERENCE VARCHAR2(24))'; END IF;
+END;
+/
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_WHATSAPP_LOGS' AND COLUMN_NAME='ERROR_MESSAGE';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_WHATSAPP_LOGS ADD (ERROR_MESSAGE VARCHAR2(1000))'; END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 15. NH_PAYMENTS - refund status (doc item 26).
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_PAYMENTS' AND COLUMN_NAME='REFUND_STATUS';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_PAYMENTS ADD (REFUND_STATUS VARCHAR2(30))'; END IF;
+END;
+/
+
+-- ---------------------------------------------------------------------
+-- 16. NH_PAYMENTS - failure reason, for recorded failed-payment attempts
+--     (gap doc item 19: payment hardening / failed-payment handling).
+--     Nullable - existing VERIFIED rows are untouched.
+-- ---------------------------------------------------------------------
+DECLARE c NUMBER; BEGIN
+  SELECT COUNT(*) INTO c FROM USER_TAB_COLUMNS WHERE TABLE_NAME='NH_PAYMENTS' AND COLUMN_NAME='FAILURE_REASON';
+  IF c = 0 THEN EXECUTE IMMEDIATE 'ALTER TABLE NH_PAYMENTS ADD (FAILURE_REASON VARCHAR2(300))'; END IF;
+END;
+/
+
+-- =====================================================================
+-- End of migration v2. spring.jpa.hibernate.ddl-auto remains "validate";
+-- every column above is nullable or has a DEFAULT, so this never breaks
+-- existing rows, and every entity that maps these columns declares them
+-- with matching nullability so Hibernate validation continues to pass.
+-- =====================================================================

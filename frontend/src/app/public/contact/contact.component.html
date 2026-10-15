@@ -1,0 +1,73 @@
+<main class="page-shell page-shell--narrow">
+  <a class="back-link" routerLink="/"><nh-icon name="chevron-left" [size]="12" /> Back home</a>
+
+  <div class="page-intro">
+    <p class="eyebrow">Contact</p>
+    <h1>Let’s plan<br /><em>your stay.</em></h1>
+    <p>Questions about a booking, a group stay, or just want to say hello? Reach us any way that’s easiest.</p>
+  </div>
+
+  <div class="contact-grid">
+    <div class="contact-info">
+      <a class="contact-info__row" [href]="contact.mapsDirectionsUrl" target="_blank" rel="noopener">
+        <span class="contact-info__icon"><nh-icon name="map-pin" [size]="17" /></span>
+        <span><strong>{{ contact.addressLine1 }}</strong><small>{{ contact.addressLine2 }}</small></span>
+      </a>
+      <a class="contact-info__row" [href]="'tel:' + contact.phoneHref">
+        <span class="contact-info__icon"><nh-icon name="phone" [size]="17" /></span>
+        <span><strong>{{ contact.phoneDisplay }}</strong><small>Call or SMS</small></span>
+      </a>
+      <a class="contact-info__row" [href]="'mailto:' + contact.email">
+        <span class="contact-info__icon"><nh-icon name="mail" [size]="17" /></span>
+        <span><strong>{{ contact.email }}</strong><small>Email us</small></span>
+      </a>
+      <a class="contact-info__row contact-info__row--whatsapp" [href]="'https://wa.me/' + contact.whatsappNumber" target="_blank" rel="noopener">
+        <span class="contact-info__icon"><nh-icon name="whatsapp" [size]="17" /></span>
+        <span><strong>WhatsApp</strong><small>Fastest way to reach us</small></span>
+      </a>
+
+      <div class="contact-map">
+        <iframe [src]="mapEmbedUrl" title="Map to Nandish Homes" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        <a class="outline-button" [href]="contact.mapsDirectionsUrl" target="_blank" rel="noopener"><nh-icon name="directions" [size]="13" /> Get directions</a>
+      </div>
+    </div>
+
+    <form class="contact-form" (ngSubmit)="submit()" novalidate>
+      <p class="eyebrow">Send a message</p>
+
+      <label>
+        Full name
+        <input name="name" [(ngModel)]="form.name" [class.input-error]="errors().name" />
+        @if (errors().name) { <span class="field-error"><nh-icon name="alert" [size]="12" /> {{ errors().name }}</span> }
+      </label>
+      <label>
+        Email
+        <input name="email" type="email" [(ngModel)]="form.email" [class.input-error]="errors().email" />
+        @if (errors().email) { <span class="field-error"><nh-icon name="alert" [size]="12" /> {{ errors().email }}</span> }
+      </label>
+      <label>
+        Phone <small>(optional)</small>
+        <input name="phone" type="tel" [(ngModel)]="form.phone" />
+      </label>
+      <label>
+        Message
+        <textarea name="message" rows="4" [(ngModel)]="form.message" [class.input-error]="errors().message"></textarea>
+        @if (errors().message) { <span class="field-error"><nh-icon name="alert" [size]="12" /> {{ errors().message }}</span> }
+      </label>
+
+      @if (state() === 'sent') {
+        <p class="form-status form-status--ok"><nh-icon name="check" [size]="14" /> Thanks &mdash; we’ve got your message and will reply soon.</p>
+      } @else if (state() === 'unavailable') {
+        <p class="form-status form-status--info">
+          <nh-icon name="alert" [size]="14" /> Our contact form isn’t connected yet &mdash; please
+          <a [href]="'mailto:' + contact.email">email us</a> or
+          <a [href]="'https://wa.me/' + contact.whatsappNumber" target="_blank" rel="noopener">WhatsApp us</a> directly and we’ll reply quickly.
+        </p>
+      }
+
+      <button class="button button--solid button--wide" type="submit" [disabled]="state() === 'sending'">
+        @if (state() === 'sending') { <span class="spinner-dark" aria-hidden="true"></span> Sending&hellip; } @else { Send message <span>&rarr;</span> }
+      </button>
+    </form>
+  </div>
+</main>

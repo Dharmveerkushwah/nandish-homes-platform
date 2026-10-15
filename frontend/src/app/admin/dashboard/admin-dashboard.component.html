@@ -1,0 +1,87 @@
+<section class="admin-page dashboard">
+  <div class="admin-page__head">
+    <div>
+      <p class="admin-page__kicker">Nandish Homes · Property console</p>
+      <h1>Welcome back, <strong>{{ name }}</strong>!</h1>
+      <p>Here's what's happening at Nandish Homes today.</p>
+    </div>
+    <time class="admin-page__time">{{ today | date:'EEE, dd MMM yyyy' }}<br /><small>{{ today | date:'hh:mm a' }}</small></time>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-state"><span class="spinner-navy"></span><span>Loading live dashboard data…</span></div>
+  } @else if (error()) {
+    <div class="empty-state"><p>Dashboard data could not be loaded right now. Please refresh, or check that the backend is running.</p></div>
+  } @else if (dashboard(); as d) {
+    <div class="dashboard__stats">
+      <article class="stat-card stat-card--blue"><span class="stat-icon"><nh-icon name="list" [size]="16" /></span><div><span>Total bookings</span><strong>{{ d.totalBookings }}</strong><small class="positive">{{ d.confirmedBookings }} confirmed · {{ d.pendingBookings }} pending</small></div></article>
+      <article class="stat-card stat-card--green"><span class="stat-icon"><nh-icon name="building" [size]="16" /></span><div><span>Occupancy rate</span><strong>{{ d.occupancyPercent | number:'1.0-0' }}%</strong><small class="positive">Current active stays</small></div></article>
+      <article class="stat-card stat-card--gold"><span class="stat-icon">₹</span><div><span>Total revenue</span><strong>{{ d.totalRevenue | currency:'INR':'symbol-narrow':'1.0-0' }}</strong><small class="positive">Today: {{ d.todaysRevenue | currency:'INR':'symbol-narrow':'1.0-0' }}</small></div></article>
+      <article class="stat-card stat-card--purple"><span class="stat-icon"><nh-icon name="calendar" [size]="16" /></span><div><span>Today's arrivals</span><strong>{{ d.todaysArrivals }}</strong><small>Check-ins today</small></div></article>
+      <article class="stat-card stat-card--red"><span class="stat-icon"><nh-icon name="clock" [size]="16" /></span><div><span>Today's departures</span><strong>{{ d.todaysDepartures }}</strong><small>Check-outs today</small></div></article>
+      <article class="stat-card stat-card--teal"><span class="stat-icon"><nh-icon name="users" [size]="16" /></span><div><span>Current guests</span><strong>{{ d.currentGuests }}</strong><small>Guests in-house</small></div></article>
+    </div>
+
+    <section class="dashboard__grid dashboard__grid--primary">
+      <section class="admin-card calendar-card">
+        <div class="admin-card-head">
+          <div><h2>Property Calendar</h2><p>Room occupancy at a glance</p></div>
+          <a class="text-link" routerLink="/admin/calendar">Full calendar →</a>
+        </div>
+        <nh-property-calendar [rangeDays]="14" (cellClick)="onCalendarCellClick($event)" />
+      </section>
+      <section class="admin-card recent-card">
+        <div class="admin-card-head"><div><h2>Recent bookings</h2><p>Latest reservations</p></div><a class="text-link" routerLink="/admin/bookings">View all →</a></div>
+        @if (!d.recentBookings.length) { <p class="admin-empty">No bookings yet. New reservations will appear here.</p> }
+        @else {
+          @for (booking of d.recentBookings; track booking.reference) {
+            <a class="recent-booking" [routerLink]="['/admin/bookings', booking.reference]">
+              <div class="recent-booking__image" [style.background-image]="'url(' + booking.room.imageUrl + ')'"></div>
+              <div><strong>{{ booking.reference }}</strong><span>{{ booking.checkIn | date:'d MMM yyyy' }} – {{ booking.checkOut | date:'d MMM yyyy' }}</span><small>{{ booking.room.name }} · {{ booking.guests }} guests</small></div>
+              <b [class]="'badge badge--' + statusClass(booking.status)">{{ readableStatus(booking.status) }}</b>
+            </a>
+          }
+        }
+      </section>
+    </section>
+
+    <section class="dashboard__grid dashboard__grid--secondary">
+      <section class="admin-card insight-card">
+        <div class="admin-card-head"><div><h2>Booking sources</h2><p>All reservations</p></div></div>
+        <div class="donut" [style.background]="'conic-gradient(' + donutGradient() + ')'"><div><strong>{{ d.totalBookings }}</strong><span>Total bookings</span></div></div>
+        @for (row of bookingSourceRows(); track row.source) {
+          <div class="source-row"><span class="source-dot" [style.background]="sourceColor(row.source)"></span><span>{{ row.source }}</span><strong>{{ row.pct }}%</strong></div>
+        }
+        @if (!bookingSourceRows().length) { <p class="admin-empty">No booking-source data yet.</p> }
+      </section>
+      <section class="admin-card insight-card revenue-card">
+        <div class="admin-card-head"><div><h2>Revenue overview</h2><p>Current range</p></div></div>
+        <div class="revenue-number">{{ d.totalRevenue | currency:'INR':'symbol-narrow':'1.0-0' }}</div>
+        <p class="revenue-sub">Average booking value: {{ averageBookingValue() | currency:'INR':'symbol-narrow':'1.0-0' }}</p>
+        <nh-line-chart [points]="revenueTrend()" />
+      </section>
+      <section class="admin-card insight-card occupancy-card">
+        <div class="admin-card-head"><div><h2>Most-booked rooms</h2><p>By reservation count</p></div></div>
+        @for (row of d.roomOccupancy; track row.roomId) {
+          <div class="occupancy-row">
+            <span>{{ row.roomName }}</span>
+            <div class="occupancy-track"><i [style.width.%]="roomBookingPercent(row.bookingCount)"></i></div>
+            <strong>{{ row.bookingCount }}</strong>
+          </div>
+        }
+        @if (!d.roomOccupancy.length) { <p class="admin-empty">No room data.</p> }
+      </section>
+      <section class="admin-card quick-card">
+        <div class="admin-card-head"><div><h2>Quick actions</h2><p>Common tasks</p></div></div>
+        <div class="quick-actions">
+          <a routerLink="/admin/bookings"><span>▣</span>View bookings</a>
+          <a routerLink="/admin/rooms"><span>□</span>Manage rooms</a>
+          <a routerLink="/admin/reports"><span>▥</span>View reports</a>
+          <a routerLink="/admin/content"><span>✦</span>Update content</a>
+        </div>
+      </section>
+    </section>
+  }
+
+  <footer class="dashboard__footer">© {{ year }} Nandish Homes. All rights reserved.<span>Stay in serenity…</span></footer>
+</section>
